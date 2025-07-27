@@ -110,7 +110,7 @@ export default function Header() {
                       Logout
                     </Button>
                   </div>
-                  <Link href='/add-money' className="text-center bg-accent border rounded-sm py-1 text-sm">Add Money</Link>
+                  <Link href='/profile' className="text-center bg-accent border rounded-sm py-1 text-sm" onClick={closeUserSidebar}>Profile</Link>
                 </SheetContent>
               </Sheet>
             </>
@@ -168,7 +168,7 @@ export default function Header() {
                     }}>
                       Logout
                     </Button>
-                    <Link href='/add-money'>Add Money</Link>
+                    <Link href='/profile' onClick={closeMobileMenu}>Profile</Link>
                   </div>
                 )}
               </nav>
