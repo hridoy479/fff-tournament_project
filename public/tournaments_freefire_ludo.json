@@ -1,0 +1,902 @@
+[
+  {
+    "id": 1,
+    "game": "Free Fire",
+    "mode": "Classic",
+    "date": "2025-07-28",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 50,
+    "prize": 250
+  },
+  {
+    "id": 2,
+    "game": "Free Fire",
+    "mode": "Clash Squad",
+    "date": "2025-08-19",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 100,
+    "prize": 800
+  },
+  {
+    "id": 3,
+    "game": "Free Fire",
+    "mode": "Classic",
+    "date": "2025-09-22",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 50,
+    "prize": 200
+  },
+  {
+    "id": 4,
+    "game": "Free Fire",
+    "mode": "Classic",
+    "date": "2025-08-25",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 100,
+    "prize": 600
+  },
+  {
+    "id": 5,
+    "game": "Ludo",
+    "mode": "Team Battle",
+    "date": "2025-08-18",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 50,
+    "prize": 250
+  },
+  {
+    "id": 6,
+    "game": "Free Fire",
+    "mode": "Lone Wolf",
+    "date": "2025-08-16",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 30,
+    "prize": 300
+  },
+  {
+    "id": 7,
+    "game": "Free Fire",
+    "mode": "Clash Squad",
+    "date": "2025-08-07",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 50,
+    "prize": 300
+  },
+  {
+    "id": 8,
+    "game": "Ludo",
+    "mode": "Quick Mode",
+    "date": "2025-09-12",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 50,
+    "prize": 400
+  },
+  {
+    "id": 9,
+    "game": "Free Fire",
+    "mode": "Clash Squad",
+    "date": "2025-09-17",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 30,
+    "prize": 300
+  },
+  {
+    "id": 10,
+    "game": "Ludo",
+    "mode": "Quick Mode",
+    "date": "2025-09-15",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 20,
+    "prize": 140
+  },
+  {
+    "id": 11,
+    "game": "Ludo",
+    "mode": "Classic",
+    "date": "2025-09-11",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 50,
+    "prize": 200
+  },
+  {
+    "id": 12,
+    "game": "Free Fire",
+    "mode": "Classic",
+    "date": "2025-09-10",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 50,
+    "prize": 500
+  },
+  {
+    "id": 13,
+    "game": "Free Fire",
+    "mode": "Clash Squad",
+    "date": "2025-07-26",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 20,
+    "prize": 180
+  },
+  {
+    "id": 14,
+    "game": "Ludo",
+    "mode": "Team Battle",
+    "date": "2025-08-06",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 50,
+    "prize": 250
+  },
+  {
+    "id": 15,
+    "game": "Free Fire",
+    "mode": "Lone Wolf",
+    "date": "2025-08-23",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 30,
+    "prize": 150
+  },
+  {
+    "id": 16,
+    "game": "Free Fire",
+    "mode": "Clash Squad",
+    "date": "2025-08-24",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 100,
+    "prize": 300
+  },
+  {
+    "id": 17,
+    "game": "Free Fire",
+    "mode": "Clash Squad",
+    "date": "2025-08-19",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 100,
+    "prize": 1000
+  },
+  {
+    "id": 18,
+    "game": "Free Fire",
+    "mode": "Classic",
+    "date": "2025-08-24",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 100,
+    "prize": 1000
+  },
+  {
+    "id": 19,
+    "game": "Ludo",
+    "mode": "Team Battle",
+    "date": "2025-08-13",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 30,
+    "prize": 150
+  },
+  {
+    "id": 20,
+    "game": "Free Fire",
+    "mode": "Clash Squad",
+    "date": "2025-07-25",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 100,
+    "prize": 300
+  },
+  {
+    "id": 21,
+    "game": "Ludo",
+    "mode": "Quick Mode",
+    "date": "2025-09-12",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 50,
+    "prize": 200
+  },
+  {
+    "id": 22,
+    "game": "Free Fire",
+    "mode": "Lone Wolf",
+    "date": "2025-08-12",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 20,
+    "prize": 120
+  },
+  {
+    "id": 23,
+    "game": "Free Fire",
+    "mode": "Clash Squad",
+    "date": "2025-09-18",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 20,
+    "prize": 140
+  },
+  {
+    "id": 24,
+    "game": "Ludo",
+    "mode": "Classic",
+    "date": "2025-09-01",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 30,
+    "prize": 150
+  },
+  {
+    "id": 25,
+    "game": "Free Fire",
+    "mode": "Lone Wolf",
+    "date": "2025-08-12",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 20,
+    "prize": 100
+  },
+  {
+    "id": 26,
+    "game": "Free Fire",
+    "mode": "Lone Wolf",
+    "date": "2025-07-31",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 30,
+    "prize": 150
+  },
+  {
+    "id": 27,
+    "game": "Ludo",
+    "mode": "Team Battle",
+    "date": "2025-09-10",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 100,
+    "prize": 700
+  },
+  {
+    "id": 28,
+    "game": "Ludo",
+    "mode": "Classic",
+    "date": "2025-08-07",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 100,
+    "prize": 700
+  },
+  {
+    "id": 29,
+    "game": "Free Fire",
+    "mode": "Clash Squad",
+    "date": "2025-09-12",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 30,
+    "prize": 150
+  },
+  {
+    "id": 30,
+    "game": "Free Fire",
+    "mode": "Lone Wolf",
+    "date": "2025-09-15",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 100,
+    "prize": 500
+  },
+  {
+    "id": 31,
+    "game": "Free Fire",
+    "mode": "Classic",
+    "date": "2025-09-13",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 30,
+    "prize": 180
+  },
+  {
+    "id": 32,
+    "game": "Ludo",
+    "mode": "Classic",
+    "date": "2025-09-18",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 20,
+    "prize": 140
+  },
+  {
+    "id": 33,
+    "game": "Ludo",
+    "mode": "Classic",
+    "date": "2025-09-09",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 100,
+    "prize": 500
+  },
+  {
+    "id": 34,
+    "game": "Ludo",
+    "mode": "Classic",
+    "date": "2025-09-18",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 30,
+    "prize": 150
+  },
+  {
+    "id": 35,
+    "game": "Ludo",
+    "mode": "Quick Mode",
+    "date": "2025-09-13",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 30,
+    "prize": 120
+  },
+  {
+    "id": 36,
+    "game": "Free Fire",
+    "mode": "Clash Squad",
+    "date": "2025-08-09",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 50,
+    "prize": 150
+  },
+  {
+    "id": 37,
+    "game": "Ludo",
+    "mode": "Quick Mode",
+    "date": "2025-09-10",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 50,
+    "prize": 200
+  },
+  {
+    "id": 38,
+    "game": "Free Fire",
+    "mode": "Lone Wolf",
+    "date": "2025-08-07",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 50,
+    "prize": 500
+  },
+  {
+    "id": 39,
+    "game": "Ludo",
+    "mode": "Team Battle",
+    "date": "2025-08-08",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 50,
+    "prize": 450
+  },
+  {
+    "id": 40,
+    "game": "Ludo",
+    "mode": "Classic",
+    "date": "2025-08-02",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 100,
+    "prize": 600
+  },
+  {
+    "id": 41,
+    "game": "Free Fire",
+    "mode": "Lone Wolf",
+    "date": "2025-09-01",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 20,
+    "prize": 200
+  },
+  {
+    "id": 42,
+    "game": "Ludo",
+    "mode": "Quick Mode",
+    "date": "2025-09-15",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 50,
+    "prize": 150
+  },
+  {
+    "id": 43,
+    "game": "Free Fire",
+    "mode": "Clash Squad",
+    "date": "2025-09-12",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 100,
+    "prize": 300
+  },
+  {
+    "id": 44,
+    "game": "Ludo",
+    "mode": "Quick Mode",
+    "date": "2025-09-17",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 100,
+    "prize": 300
+  },
+  {
+    "id": 45,
+    "game": "Free Fire",
+    "mode": "Classic",
+    "date": "2025-09-20",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 20,
+    "prize": 200
+  },
+  {
+    "id": 46,
+    "game": "Free Fire",
+    "mode": "Clash Squad",
+    "date": "2025-07-30",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 50,
+    "prize": 200
+  },
+  {
+    "id": 47,
+    "game": "Free Fire",
+    "mode": "Clash Squad",
+    "date": "2025-08-27",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 50,
+    "prize": 500
+  },
+  {
+    "id": 48,
+    "game": "Ludo",
+    "mode": "Quick Mode",
+    "date": "2025-08-25",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 100,
+    "prize": 700
+  },
+  {
+    "id": 49,
+    "game": "Ludo",
+    "mode": "Quick Mode",
+    "date": "2025-09-11",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 20,
+    "prize": 200
+  },
+  {
+    "id": 50,
+    "game": "Free Fire",
+    "mode": "Clash Squad",
+    "date": "2025-09-02",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 50,
+    "prize": 150
+  },
+  {
+    "id": 51,
+    "game": "Ludo",
+    "mode": "Team Battle",
+    "date": "2025-08-31",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 20,
+    "prize": 160
+  },
+  {
+    "id": 52,
+    "game": "Ludo",
+    "mode": "Quick Mode",
+    "date": "2025-08-22",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 30,
+    "prize": 90
+  },
+  {
+    "id": 53,
+    "game": "Free Fire",
+    "mode": "Clash Squad",
+    "date": "2025-08-18",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 30,
+    "prize": 180
+  },
+  {
+    "id": 54,
+    "game": "Free Fire",
+    "mode": "Classic",
+    "date": "2025-07-26",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 30,
+    "prize": 270
+  },
+  {
+    "id": 55,
+    "game": "Free Fire",
+    "mode": "Clash Squad",
+    "date": "2025-09-02",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 100,
+    "prize": 1000
+  },
+  {
+    "id": 56,
+    "game": "Ludo",
+    "mode": "Team Battle",
+    "date": "2025-08-16",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 50,
+    "prize": 300
+  },
+  {
+    "id": 57,
+    "game": "Free Fire",
+    "mode": "Classic",
+    "date": "2025-09-21",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 50,
+    "prize": 500
+  },
+  {
+    "id": 58,
+    "game": "Free Fire",
+    "mode": "Clash Squad",
+    "date": "2025-08-24",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 30,
+    "prize": 240
+  },
+  {
+    "id": 59,
+    "game": "Free Fire",
+    "mode": "Lone Wolf",
+    "date": "2025-09-21",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 50,
+    "prize": 400
+  },
+  {
+    "id": 60,
+    "game": "Ludo",
+    "mode": "Classic",
+    "date": "2025-09-12",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 30,
+    "prize": 210
+  },
+  {
+    "id": 61,
+    "game": "Ludo",
+    "mode": "Quick Mode",
+    "date": "2025-09-17",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 20,
+    "prize": 120
+  },
+  {
+    "id": 62,
+    "game": "Free Fire",
+    "mode": "Lone Wolf",
+    "date": "2025-08-08",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 50,
+    "prize": 300
+  },
+  {
+    "id": 63,
+    "game": "Ludo",
+    "mode": "Team Battle",
+    "date": "2025-09-10",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 50,
+    "prize": 200
+  },
+  {
+    "id": 64,
+    "game": "Ludo",
+    "mode": "Classic",
+    "date": "2025-08-18",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 20,
+    "prize": 200
+  },
+  {
+    "id": 65,
+    "game": "Free Fire",
+    "mode": "Classic",
+    "date": "2025-09-04",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 100,
+    "prize": 1000
+  },
+  {
+    "id": 66,
+    "game": "Free Fire",
+    "mode": "Clash Squad",
+    "date": "2025-08-31",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 100,
+    "prize": 500
+  },
+  {
+    "id": 67,
+    "game": "Free Fire",
+    "mode": "Clash Squad",
+    "date": "2025-09-13",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 20,
+    "prize": 180
+  },
+  {
+    "id": 68,
+    "game": "Ludo",
+    "mode": "Classic",
+    "date": "2025-09-18",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 20,
+    "prize": 180
+  },
+  {
+    "id": 69,
+    "game": "Free Fire",
+    "mode": "Lone Wolf",
+    "date": "2025-07-28",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 30,
+    "prize": 270
+  },
+  {
+    "id": 70,
+    "game": "Ludo",
+    "mode": "Team Battle",
+    "date": "2025-09-10",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 20,
+    "prize": 100
+  },
+  {
+    "id": 71,
+    "game": "Ludo",
+    "mode": "Quick Mode",
+    "date": "2025-08-20",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 50,
+    "prize": 500
+  },
+  {
+    "id": 72,
+    "game": "Ludo",
+    "mode": "Team Battle",
+    "date": "2025-08-16",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 30,
+    "prize": 180
+  },
+  {
+    "id": 73,
+    "game": "Ludo",
+    "mode": "Quick Mode",
+    "date": "2025-08-26",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 50,
+    "prize": 500
+  },
+  {
+    "id": 74,
+    "game": "Free Fire",
+    "mode": "Clash Squad",
+    "date": "2025-09-22",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 50,
+    "prize": 450
+  },
+  {
+    "id": 75,
+    "game": "Ludo",
+    "mode": "Team Battle",
+    "date": "2025-08-25",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 50,
+    "prize": 150
+  },
+  {
+    "id": 76,
+    "game": "Ludo",
+    "mode": "Team Battle",
+    "date": "2025-09-04",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 30,
+    "prize": 90
+  },
+  {
+    "id": 77,
+    "game": "Ludo",
+    "mode": "Quick Mode",
+    "date": "2025-09-07",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 30,
+    "prize": 240
+  },
+  {
+    "id": 78,
+    "game": "Free Fire",
+    "mode": "Classic",
+    "date": "2025-09-12",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 30,
+    "prize": 270
+  },
+  {
+    "id": 79,
+    "game": "Ludo",
+    "mode": "Team Battle",
+    "date": "2025-09-15",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 100,
+    "prize": 400
+  },
+  {
+    "id": 80,
+    "game": "Free Fire",
+    "mode": "Clash Squad",
+    "date": "2025-07-31",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 30,
+    "prize": 300
+  },
+  {
+    "id": 81,
+    "game": "Ludo",
+    "mode": "Classic",
+    "date": "2025-09-03",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 30,
+    "prize": 180
+  },
+  {
+    "id": 82,
+    "game": "Ludo",
+    "mode": "Classic",
+    "date": "2025-08-23",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 50,
+    "prize": 250
+  },
+  {
+    "id": 83,
+    "game": "Free Fire",
+    "mode": "Clash Squad",
+    "date": "2025-09-08",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 30,
+    "prize": 150
+  },
+  {
+    "id": 84,
+    "game": "Free Fire",
+    "mode": "Lone Wolf",
+    "date": "2025-09-14",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 20,
+    "prize": 200
+  },
+  {
+    "id": 85,
+    "game": "Ludo",
+    "mode": "Quick Mode",
+    "date": "2025-08-22",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 50,
+    "prize": 400
+  },
+  {
+    "id": 86,
+    "game": "Ludo",
+    "mode": "Team Battle",
+    "date": "2025-09-16",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 20,
+    "prize": 200
+  },
+  {
+    "id": 87,
+    "game": "Ludo",
+    "mode": "Team Battle",
+    "date": "2025-08-07",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 100,
+    "prize": 700
+  },
+  {
+    "id": 88,
+    "game": "Free Fire",
+    "mode": "Lone Wolf",
+    "date": "2025-08-31",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 50,
+    "prize": 350
+  },
+  {
+    "id": 89,
+    "game": "Ludo",
+    "mode": "Quick Mode",
+    "date": "2025-09-23",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 20,
+    "prize": 160
+  },
+  {
+    "id": 90,
+    "game": "Ludo",
+    "mode": "Classic",
+    "date": "2025-08-23",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 30,
+    "prize": 300
+  },
+  {
+    "id": 91,
+    "game": "Ludo",
+    "mode": "Classic",
+    "date": "2025-08-19",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 30,
+    "prize": 150
+  },
+  {
+    "id": 92,
+    "game": "Ludo",
+    "mode": "Team Battle",
+    "date": "2025-08-25",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 30,
+    "prize": 120
+  },
+  {
+    "id": 93,
+    "game": "Free Fire",
+    "mode": "Classic",
+    "date": "2025-08-11",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 20,
+    "prize": 160
+  },
+  {
+    "id": 94,
+    "game": "Free Fire",
+    "mode": "Clash Squad",
+    "date": "2025-08-04",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 50,
+    "prize": 450
+  },
+  {
+    "id": 95,
+    "game": "Free Fire",
+    "mode": "Clash Squad",
+    "date": "2025-08-03",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 50,
+    "prize": 400
+  },
+  {
+    "id": 96,
+    "game": "Free Fire",
+    "mode": "Classic",
+    "date": "2025-08-05",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 30,
+    "prize": 270
+  },
+  {
+    "id": 97,
+    "game": "Free Fire",
+    "mode": "Lone Wolf",
+    "date": "2025-09-23",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 30,
+    "prize": 300
+  },
+  {
+    "id": 98,
+    "game": "Free Fire",
+    "mode": "Lone Wolf",
+    "date": "2025-08-20",
+    "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg",
+    "entry_fee": 20,
+    "prize": 60
+  },
+  {
+    "id": 99,
+    "game": "Ludo",
+    "mode": "Quick Mode",
+    "date": "2025-09-02",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 20,
+    "prize": 140
+  },
+  {
+    "id": 100,
+    "game": "Ludo",
+    "mode": "Team Battle",
+    "date": "2025-09-09",
+    "image": "https://play-lh.googleusercontent.com/5PZcX-mv-ZRI-pTRjEorKnJKeWyOijyGmiK7lAyNntbHgJ_FDdHqkOkVgmpZbGm27qA=w526-h296-rw",
+    "entry_fee": 100,
+    "prize": 1000
+  }
+]

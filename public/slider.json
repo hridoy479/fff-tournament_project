@@ -1,0 +1,17 @@
+[
+    {
+        "id": 1,
+        "title": "Call of Duty",
+        "image": "/slider1.jpg"
+    },
+    {
+        "id": 2,
+        "title": "Clash of Clans",
+        "image": "/slide2.jpg"
+    },
+    {
+        "id": 3,
+        "title": "Ludo King",
+        "image": "/slide3.jpg"
+    }
+]
