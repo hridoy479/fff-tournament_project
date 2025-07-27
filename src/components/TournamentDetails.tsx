@@ -52,7 +52,7 @@ const TournamentDetails = () => {
 
   const dateObj = new Date(tournament.date);
   const progress = Math.min((tournament.joined_players / tournament.max_players) * 100, 100);
-
+    
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
       <div className="bg-white dark:bg-zinc-900 shadow-md rounded-2xl p-6 md:p-8">

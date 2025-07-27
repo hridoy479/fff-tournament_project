@@ -4,7 +4,29 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
+import { useEffect, useState } from 'react';
+import { onAuthStateChanged, User } from 'firebase/auth';
+import { auth } from '@/config/firebase';
+import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
+
 const ProfileDirectory = () => {
+    const [user, setUser] = useState<User | null>(null);
+    const router = useRouter();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+      } else {
+        toast.error('Please log in first.');
+        router.push('/login');
+      }
+    });
+
+    return () => unsubscribe();
+  }, [router]);
+  if(!user) return null;
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 mt-28">
       <h2 className="text-2xl font-bold mb-6 text-center">My Profile</h2>
