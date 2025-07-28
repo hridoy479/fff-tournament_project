@@ -1,62 +1,40 @@
+// PaymentMethodSelector.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
-import { onAuthStateChanged, User } from 'firebase/auth';
-import { auth } from '@/config/firebase';
-import { useRouter } from 'next/navigation';
-import { toast } from 'react-toastify';
+import { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import Image from 'next/image';
 
-const AddMoney = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [amount, setAmount] = useState<string>('');
-  const router = useRouter();
+export default function PaymentMethodSelector({ onSelect }: { onSelect: (method: string) => void }) {
+  const [selected, setSelected] = useState('');
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-      } else {
-        toast.error('Please log in first.');
-        router.push('/login');
-      }
-    });
-
-    return () => unsubscribe();
-  }, [router]);
-
-  const handleAddMoney = () => {
-    if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
-      toast.error('Enter a valid amount');
-      return;
-    }
-
-    // Simulate success message (Replace with real DB update)
-    toast.success(`Successfully added ৳${amount} to your wallet.`);
-    setAmount('');
+  const handleSelect = (method: string) => {
+    setSelected(method);
+    onSelect(method);
   };
 
-  if (!user) return null;
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-purple-200 p-4">
-      <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-4 text-center text-gray-800">Add Money</h1>
-        <input
-          type="number"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          placeholder="Enter amount (৳)"
-          className="w-full px-4 py-3 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-        />
-        <button
-          onClick={handleAddMoney}
-          className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-all"
+    <div className="flex flex-col md:flex-row  gap-4 mt-38  items-center justify-center pb-14 pt-20"> 
+      {['Bkash', 'Nagad'].map((method) => (
+        <Card
+          key={method}
+          onClick={() => handleSelect(method)}
+          className={`cursor-pointer transition-all duration-300 w-50 h-50 ${
+            selected === method ? 'border-2 border-pink-500 shadow-xl' : 'border'
+          }`}
         >
-          Add Money
-        </button>
-      </div>
+          <CardContent className="flex flex-col items-center justify-center p-4">
+            <Image
+              src={`/images/${method}.png`} // You should place bkash.png and nagad.png in your public/images folder
+              alt={`${method} logo`}
+              width={80}
+              height={80}
+            />
+            <p className="mt-2 font-semibold text-center capitalize">{method}</p>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
-};
-
-export default AddMoney;
+}

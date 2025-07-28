@@ -54,7 +54,7 @@ const ProfileDirectory = () => {
               placeholder="Enter amount"
               className="px-3 py-2 rounded text-black"
             />
-            <Button className="bg-white text-green-700 hover:bg-green-100">
+            <Button className="bg-white text-green-700 hover:bg-green-100" onClick={() => router.push('/add-money')}>
               Add Funds
             </Button>
           </CardContent>
