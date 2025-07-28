@@ -1,5 +1,6 @@
-import AddMoneyWrapper from '@/components/AddMoneyWrapper';
+import AddMoney from "@/components/AddMoney";
 
-export default function AddMoneyPage() {
-  return <AddMoneyWrapper />;
+
+export  default function page() {
+  return <AddMoney/>;
 }

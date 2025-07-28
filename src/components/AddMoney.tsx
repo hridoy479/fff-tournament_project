@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 
-export default function PaymentMethodSelector({ onSelect }: { onSelect: (method: string) => void }) {
+export default function AddMoney({ onSelect }: { onSelect: (method: string) => void }) {
   const [selected, setSelected] = useState('');
 
   const handleSelect = (method: string) => {
