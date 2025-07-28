@@ -28,16 +28,21 @@ export function Login() {
       await signInWithEmailAndPassword(auth, email, password);
       toast.success('Login successful');
       router.push('/');
-    } catch (error: any) {
-      if (error.code === 'auth/user-not-found') {
-        toast.info('No account found. Redirecting to signup...');
-        setTimeout(() => {
-          router.push('/signup');
-        }, 2000);
-      } else if (error.code === 'auth/wrong-password') {
-        toast.error('Incorrect password');
+    } catch (error: unknown) {
+      if (typeof error === 'object' && error !== null && 'code' in error) {
+        const firebaseError = error as { code: string; message?: string };
+        if (firebaseError.code === 'auth/user-not-found') {
+          toast.info('No account found. Redirecting to signup...');
+          setTimeout(() => {
+            router.push('/signup');
+          }, 2000);
+        } else if (firebaseError.code === 'auth/wrong-password') {
+          toast.error('Incorrect password');
+        } else {
+          toast.error(firebaseError.message || 'Login failed');
+        }
       } else {
-        toast.error(error.message || 'Login failed');
+        toast.error('An unknown error occurred');
       }
     }
   };
@@ -47,8 +52,13 @@ export function Login() {
       await signInWithPopup(auth, provider);
       toast.success('Google login successful');
       router.push('/');
-    } catch (error: any) {
-      toast.error(error.message || 'Google login failed');
+    } catch (error: unknown) {
+      if (typeof error === 'object' && error !== null && 'message' in error) {
+        const firebaseError = error as { message?: string };
+        toast.error(firebaseError.message || 'Google login failed');
+      } else {
+        toast.error('An unknown error occurred');
+      }
     }
   };
 

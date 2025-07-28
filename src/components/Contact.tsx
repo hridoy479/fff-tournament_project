@@ -44,9 +44,13 @@ export default function Contact() {
 
     toast.success('Message sent successfully!');
     setFormData({ name: '', email: '', message: '' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     toast.error('Failed to send message.');
-    console.error('Firestore error:', error.message);
+    if (error instanceof Error) {
+      console.error('Firestore error:', error.message);
+    } else {
+      console.error('Firestore error:', error);
+    }
   } finally {
     setLoading(false);
   }

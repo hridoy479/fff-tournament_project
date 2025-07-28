@@ -27,33 +27,37 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
 
   const handleSignup = async (e: React.FormEvent) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (password !== confirmPassword) {
-    toast.error("Passwords do not match");
-    return;
-  }
-
-  setLoading(true);
-
-  try {
-    await createUserWithEmailAndPassword(auth, email, password);
-    toast.success("Signup successful! Redirecting...");
-    router.push('/tournaments');
-  } catch (error: any) {
-    if (error.code === 'auth/email-already-in-use') {
-      toast.info('User already exists. Redirecting to login...');
-      setTimeout(() => {
-        router.push('/login');
-      }, 2000);
-    } else {
-      toast.error(error.message || "Signup failed");
+    if (password !== confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
     }
-  } finally {
-    setLoading(false);
-  }
-};
 
+    setLoading(true);
+
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      toast.success('Signup successful! Redirecting...');
+      router.push('/tournaments');
+    } catch (error: unknown) {
+      if (typeof error === 'object' && error !== null && 'code' in error) {
+        const firebaseError = error as { code: string; message?: string };
+        if (firebaseError.code === 'auth/email-already-in-use') {
+          toast.info('User already exists. Redirecting to login...');
+          setTimeout(() => {
+            router.push('/login');
+          }, 2000);
+        } else {
+          toast.error(firebaseError.message || 'Signup failed');
+        }
+      } else {
+        toast.error('An unknown error occurred');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-black to-pink-900 p-6 mt-16">
