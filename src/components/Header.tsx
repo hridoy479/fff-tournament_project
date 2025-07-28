@@ -111,6 +111,9 @@ export default function Header() {
                     </Button>
                   </div>
                   <Link href='/profile' className="text-center bg-accent border rounded-sm py-1 text-sm" onClick={closeUserSidebar}>Profile</Link>
+                  {user.email === 'hridoymolla479@gmail.com' && (
+                    <Link href='/dashboard' className="text-center bg-accent border rounded-sm py-1 text-sm" onClick={closeUserSidebar}>Dashboard</Link>
+                  )}
                 </SheetContent>
               </Sheet>
             </>
@@ -169,6 +172,9 @@ export default function Header() {
                       Logout
                     </Button>
                     <Link href='/profile' onClick={closeMobileMenu}>Profile</Link>
+                     {user.email === 'hridoymolla479@gmail.com' && (
+                    <Link href='/dashboard' className="text-center bg-accent border rounded-sm py-1 text-sm" onClick={closeUserSidebar}>Dashboard</Link>
+                  )}
                   </div>
                 )}
               </nav>
