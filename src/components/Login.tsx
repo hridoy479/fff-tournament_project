@@ -64,7 +64,7 @@ export function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-black to-red-900 p-4 mt-20">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-black to-red-900 p-4 mt-16">
       <Card className="w-full max-w-md shadow-lg border border-red-500">
         <CardHeader className="text-center">
           <motion.div
