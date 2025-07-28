@@ -6,7 +6,7 @@ import { Sidebar, SidebarProvider } from "@/components/ui/sidebar";
 import Header from "@/components/Header";
 import { AlertDemo } from "@/components/AlertDemo";
 import Footer from "@/components/Footer";
-
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
