@@ -13,7 +13,7 @@ import { FaTelegramPlane, FaWhatsapp, FaEnvelope } from 'react-icons/fa';
 import { db } from '@/config/firebase'; // adjust path
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import {Main} from '@/components/Main';
-
+import React, { FormEvent } from 'react';
 
 // Define the form data interface
 interface FormData {
@@ -30,7 +30,7 @@ export default function Contact() {
   });
   const [loading, setLoading] = useState<boolean>(false);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
   e.preventDefault();
   setLoading(true);
 
