@@ -1,11 +1,13 @@
-import React from 'react'
+import React, { ReactNode } from 'react';
 
-export function Main(props:any) {
-    const { children } = props;
-  return (
-    <div className='flex-1'>
-        {children}
-    </div>
-  )
+interface MainProps {
+  children: ReactNode;
 }
 
+export function Main({ children }: MainProps) {
+  return (
+    <div className='flex-1'>
+      {children}
+    </div>
+  );
+}
