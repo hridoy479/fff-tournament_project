@@ -31,10 +31,14 @@ export default function DashboardPage(): React.ReactElement | null {
 
   // ✅ Show dashboard to super admin
   return (
-    <div className=''>
-      <div className='text-4xl text-center mt-100'>
-        Welcome to the Dashboard, {user.displayName || user.email}!
-      </div>
-    </div>
+    
+      <div className="flex flex-col h-screen mt-28">
+        <div className="flex-1 p-4">
+          <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
+          <p>Welcome, {user.displayName || user.email}!</p>
+          {/* Add your dashboard content here */}
+        </div>
+        </div>
+
   );
 }
