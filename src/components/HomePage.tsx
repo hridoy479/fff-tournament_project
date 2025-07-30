@@ -7,6 +7,7 @@ import { MobileCarousel } from "@/components/MobileCarousel";
 import TournamentCardHome from "@/components/TournamentCardHome";
 import HomeSlider from "@/components/HomeSlider";
 import { motion } from "framer-motion";
+import RulesComponents from "./RulesComponents";
 
  function HomePage() {
   return (
@@ -20,6 +21,7 @@ import { motion } from "framer-motion";
         transition={{ duration: 0.8 }}
         className="flex flex-col items-center justify-center px-4 "
       >
+        <RulesComponents />
         <div className="w-full max-w-7xl mx-auto ">
           <HomeSlider />
         </div>
