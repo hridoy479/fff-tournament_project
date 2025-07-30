@@ -13,11 +13,7 @@ import { useAuth } from "@/hooks/useAuth";  // Your custom auth hook with Fireba
 import { auth } from "@/config/firebase";
 import { signOut } from "firebase/auth";
 
-const navLinks = [
-  { name: "Home", href: "/", icon: <Home className="h-4 w-4" /> },
-  { name: "Tournaments", href: "/tournaments", icon: <Gamepad2 className="h-4 w-4" /> },
-  { name: "Contact", href: "/contact", icon: <Users2 className="h-4 w-4" /> },
-];
+
 
 export default function Header() {
   const pathname = usePathname();
@@ -56,20 +52,41 @@ export default function Header() {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex space-x-8">
-          {navLinks.map((link) => (
+         
             <Link
-              key={link.name}
-              href={link.href}
+              href="/"
               className={`font-semibold hover:text-red-600 dark:hover:text-red-500 transition ${
-                pathname === link.href ? "text-red-600 dark:text-red-500" : ""
+              pathname === "/" ? "text-red-600 dark:text-red-500" : ""
               }`}
             >
               <div className="flex items-center space-x-2">
-                {link.icon}
-                <span>{link.name}</span>
+              <Home className="h-4 w-4" />
+              <span>Home</span>
               </div>
             </Link>
-          ))}
+            <Link
+              href="/tournaments"
+              className={`font-semibold hover:text-red-600 dark:hover:text-red-500 transition ${
+              pathname === "/tournaments" ? "text-red-600 dark:text-red-500" : ""
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+              <Gamepad2 className="h-4 w-4" />
+              <span>Tournaments</span>
+              </div>
+            </Link>
+            <Link
+              href="/contact"
+              className={`font-semibold hover:text-red-600 dark:hover:text-red-500 transition ${
+              pathname === "/contact" ? "text-red-600 dark:text-red-500" : ""
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+              <Users2 className="h-4 w-4" />
+              <span>Contact</span>
+              </div>
+            </Link>
+         
         </nav>
 
         {/* Desktop Actions */}
@@ -138,20 +155,35 @@ export default function Header() {
               className="bg-white dark:bg-[#111827] text-black dark:text-white p-6"
             >
               <nav className="flex flex-col space-y-6 mt-4">
-                {navLinks.map((link) => (
+               
                   <Link
-                    key={link.name}
-                    href={link.href}
+                    href="/"
                     className={`text-lg font-semibold hover:text-red-600 dark:hover:text-red-500 transition ${
-                      pathname === link.href
-                        ? "text-red-600 dark:text-red-500"
-                        : ""
+                    pathname === "/" ? "text-red-600 dark:text-red-500" : ""
                     }`}
-                    onClick={closeMobileMenu} // Close menu on click
+                    onClick={closeMobileMenu}
                   >
-                    {link.name}
+                    Home
                   </Link>
-                ))}
+                  <Link
+                    href="/tournaments"
+                    className={`text-lg font-semibold hover:text-red-600 dark:hover:text-red-500 transition ${
+                    pathname === "/tournaments" ? "text-red-600 dark:text-red-500" : ""
+                    }`}
+                    onClick={closeMobileMenu}
+                  >
+                    Tournaments
+                  </Link>
+                  <Link
+                    href="/contact"
+                    className={`text-lg font-semibold hover:text-red-600 dark:hover:text-red-500 transition ${
+                    pathname === "/contact" ? "text-red-600 dark:text-red-500" : ""
+                    }`}
+                    onClick={closeMobileMenu}
+                  >
+                    Contact
+                  </Link>
+              
 
                 {!loading && !user && (
                   <Link href={"/login"} onClick={closeMobileMenu}>
