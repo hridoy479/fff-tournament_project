@@ -8,6 +8,7 @@ import TournamentCardHome from "@/components/TournamentCardHome";
 import HomeSlider from "@/components/HomeSlider";
 import { motion } from "framer-motion";
 import RulesComponents from "./RulesComponents";
+import BeforeFooter from "./BeforeFooter";
 
  function HomePage() {
   return (
@@ -72,6 +73,7 @@ import RulesComponents from "./RulesComponents";
           <TournamentCardHome />
         </div>
       </motion.section>
+      <BeforeFooter/>
 
       
     </main>
