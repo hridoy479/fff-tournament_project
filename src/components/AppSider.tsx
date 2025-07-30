@@ -6,7 +6,7 @@ import React, { useState } from "react"
 const items = [
   { title: "Home", url: "#", icon: Home },
   { title: "Inbox", url: "#", icon: Inbox },
-  { title: "Add", url: "#", icon: IceCream },
+  { title: "Add Tournament", url: "/addtournament", icon: IceCream },
   { title: "Search", url: "#", icon: Search },
   { title: "Settings", url: "#", icon: Settings },
 ]
