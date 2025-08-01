@@ -1,23 +1,35 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-
-import { useEffect, useState } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/config/firebase';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/config/firebase'; // ensure db is exported from firebase config
 
 const ProfileDirectory = () => {
-    const [user, setUser] = useState<User | null>(null);
-    const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const [accountBalance, setAccountBalance] = useState<number>(0);
+  const [gameBalance, setGameBalance] = useState<number>(0);
+  const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
+        const userRef = doc(db, 'users', currentUser.uid);
+        const docSnap = await getDoc(userRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setAccountBalance(data.accountBalance || 0);
+          setGameBalance(data.gameBalance || 0);
+        } else {
+          toast.warning('User data not found.');
+        }
       } else {
         toast.error('Please log in first.');
         router.push('/login');
@@ -26,7 +38,9 @@ const ProfileDirectory = () => {
 
     return () => unsubscribe();
   }, [router]);
-  if(!user) return null;
+
+  if (!user) return null;
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 mt-28">
       <h2 className="text-2xl font-bold mb-6 text-center">My Profile</h2>
@@ -35,14 +49,14 @@ const ProfileDirectory = () => {
         <Card className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-xl">
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold mb-2">Account Balance</h3>
-            <p className="text-2xl font-bold">$50.00</p>
+            <p className="text-2xl font-bold">{accountBalance.toFixed(2)}টাকা</p>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-xl">
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold mb-2">Game Balance</h3>
-            <p className="text-2xl font-bold">$20.00</p>
+            <p className="text-2xl font-bold">{gameBalance.toFixed(2)}টাকা</p>
           </CardContent>
         </Card>
 
@@ -54,7 +68,10 @@ const ProfileDirectory = () => {
               placeholder="Enter amount"
               className="px-3 py-2 rounded text-black"
             />
-            <Button className="bg-white text-green-700 hover:bg-green-100" onClick={() => router.push('/add-money')}>
+            <Button
+              className="bg-white text-green-700 hover:bg-green-100"
+              onClick={() => router.push('/add-money')}
+            >
               Add Funds
             </Button>
           </CardContent>

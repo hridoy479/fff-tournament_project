@@ -3,6 +3,7 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore'; // ✅ Import Firestore
 
+
 const firebaseConfig = {
   apiKey: "AIzaSyCHIPPj-0EZ1IGRjf6juQlLVqxDkvcZg1w",
   authDomain: "fff-tournament-daf19.firebaseapp.com",
