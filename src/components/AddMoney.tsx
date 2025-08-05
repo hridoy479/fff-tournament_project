@@ -1,37 +1,51 @@
-// PaymentMethodSelector.tsx
 'use client';
 
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+
+type PaymentMethod = {
+  name: string;
+  image: string;
+  url: string;
+};
 
 export default function AddMoney({ onSelect }: { onSelect: (method: string) => void }) {
   const [selected, setSelected] = useState('');
+  const router = useRouter();
 
-  const handleSelect = (method: string) => {
-    setSelected(method);
-    onSelect(method);
+  const handleAddMoney: PaymentMethod[] = [
+    { name: 'bkash', image: '/images/bkash.png', url: '/bkash-payment' },
+    { name: 'nagad', image: '/images/nagad.png', url: '/nagad-payment' }
+  ];
+
+  const handleSelect = (method: PaymentMethod) => {
+    setSelected(method.name);
+    onSelect(method.name);
+    router.push(method.url);
   };
 
   return (
-    <div className="flex flex-col md:flex-row  gap-4 mt-38  items-center justify-center pb-14 pt-20"> 
-      {['Bkash', 'Nagad'].map((method) => (
+    <div className="flex flex-col md:flex-row gap-6 mt-12 items-center justify-center pb-14">
+      {handleAddMoney.map((method) => (
         <Card
-          key={method}
+          key={method.name}
           onClick={() => handleSelect(method)}
-          className={`cursor-pointer transition-all duration-300 w-50 h-50 ${
-            selected === method ? 'border-2 border-pink-500 shadow-xl' : 'border'
+          className={`cursor-pointer transition-all duration-300 w-52 h-52 ${
+            selected === method.name ? 'border-2 border-pink-500 shadow-xl' : 'border'
           }`}
         >
-          <CardContent className="flex flex-col items-center justify-center p-4">
+          <CardContent className="flex flex-col items-center justify-center p-6">
             <Image
-              src={`/images/${method}.png`} // You should place bkash.png and nagad.png in your public/images folder
-              alt={`${method} logo`}
+              src={method.image}
+              alt={`${method.name} logo`}
               width={80}
               height={80}
+              className="rounded"
             />
-            <p className="mt-2 font-semibold text-center capitalize">{method}</p>
+            <p className="mt-4 font-semibold text-center capitalize text-lg">{method.name}</p>
           </CardContent>
         </Card>
       ))}

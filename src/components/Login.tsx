@@ -36,7 +36,8 @@ export function Login() {
         uid: user.uid,
         name: user.displayName || '',
         email: user.email || '',
-        balance: 0,
+        accountBalance: 0,
+        gameBalance: 0
       });
     }
   };
