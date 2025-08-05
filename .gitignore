@@ -23,7 +23,7 @@
 # misc
 .DS_Store
 *.pem
-/config
+src/config/firebase.ts
 
 # debug
 npm-debug.log*
