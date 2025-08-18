@@ -2,12 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import Countdown from "react-countdown";
-import { Calendar, Clock } from "lucide-react";
+import { Calendar, Clock, Router } from "lucide-react";
 import axios from "axios";
+
 
 // Import shadcn/ui components
 import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
+import { useRouter } from "next/router";
 
 interface Tournament {
   game: string;
@@ -137,7 +139,7 @@ const TournamentCard: React.FC<TournamentCardProps> = ({ selectedGame }) => {
                       : "bg-indigo-600 hover:bg-indigo-700 text-white"
                     }`}
                   type="button"
-                  disabled={progressPercent >= 100}
+                  disabled={progressPercent >= 100} onClick={()=>{}}
                 >
                   {progressPercent >= 100 ? "Tournament Full" : "Join Now"}
                 </button>
