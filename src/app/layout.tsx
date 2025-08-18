@@ -7,6 +7,7 @@ import Header from "@/components/Header";
 import { AlertDemo } from "@/components/AlertDemo";
 import Footer from "@/components/Footer";
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,6 +44,7 @@ export default function RootLayout({
          
             {children}
             <Footer />
+            <Toaster position="top-right" />
             
           </ThemeProvider>
       </body>

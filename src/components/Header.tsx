@@ -41,12 +41,9 @@ export default function Header() {
       <div className="container mx-auto flex items-center justify-between px-6 py-4">
         {/* Logo with Avatar */}
         <Link href="/" className="flex items-center space-x-2">
-          <Avatar className="h-20 w-20">
-            <AvatarImage src="./Logo.png" />
-            <AvatarFallback>FF</AvatarFallback>
-          </Avatar>
+         
           <span className="text-xl font-extrabold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent uppercase">
-            FFF Esports
+            FFF Tournaments
           </span>
         </Link>
 

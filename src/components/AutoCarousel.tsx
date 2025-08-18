@@ -1,7 +1,7 @@
 'use client';
 import * as React from "react"
 import { useEffect, useState } from "react"
-import axios from "axios"
+import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import {
   Carousel,
@@ -36,13 +36,15 @@ export function AutoCarousel() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    axios.get<Product[]>('/gaming.json')
-      .then(res => {
-        setItems(res.data)
+    fetch('/gaming.json')
+      .then(async (res) => {
+        if (!res.ok) throw new Error('Failed to fetch')
+        const data = (await res.json()) as Product[]
+        setItems(data)
         setLoading(false)
       })
-      .catch(err => {
-        setError(err.message)
+      .catch((err: unknown) => {
+        setError(err instanceof Error ? err.message : 'Unknown error')
         setLoading(false)
       })
   }, [])
@@ -72,7 +74,15 @@ export function AutoCarousel() {
             <div className="p-2">
               <Card>
                 <CardContent className="flex items-center justify-center p-0 h-48">
-                  <img src={item.image} alt={item.title} className="object-cover w-full h-full rounded-xl cursor-pointer hover:scale-120" />
+                  <div className="relative w-full h-full">
+                    <Image
+                      src={item.image}
+                      alt={item.title}
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      className="object-cover rounded-xl"
+                    />
+                  </div>
                 </CardContent>
               </Card>
             </div>

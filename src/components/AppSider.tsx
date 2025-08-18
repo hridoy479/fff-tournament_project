@@ -4,9 +4,9 @@ import Link from "next/link"
 import React, { useState } from "react"
 
 const items = [
-  { title: "Home", url: "#", icon: Home },
-  { title: "Inbox", url: "#", icon: Inbox },
-  { title: "Add Tournament", url: "/addtournament", icon: IceCream },
+  { title: "Home", url: "/dashboard", icon: Home },
+  { title: "Joined Tournaments", url: "/dashboard/joined-tournaments", icon: Inbox },
+  { title: "Manage Tournaments", url: "/dashboard/tournaments", icon: IceCream },
   { title: "Search", url: "#", icon: Search },
   { title: "Settings", url: "#", icon: Settings },
 ]

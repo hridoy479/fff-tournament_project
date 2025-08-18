@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useEffect, useState } from "react";
-import Countdown from "react-countdown";
+import dynamic from "next/dynamic";
+import Image from "next/image";
+import Link from "next/link";
 import { Calendar, Clock } from "lucide-react";
-import axios from "axios";
+const Countdown = dynamic(() => import("react-countdown").then((m) => m.default), { ssr: false });
 
 interface Tournament {
   game: string;
@@ -19,8 +21,13 @@ const TournamentCardHome= () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    axios.get<Tournament[]>('/tournaments.json')
-      .then((res) => setTournaments(res.data))
+    fetch('/tournaments.json')
+      .then(async (res) => {
+        if (!res.ok) throw new Error('Failed to fetch tournaments')
+        const data = (await res.json()) as Tournament[]
+        setTournaments(data)
+      })
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
@@ -42,16 +49,20 @@ const TournamentCardHome= () => {
           const tournamentDate = new Date(tournament.date);
 
           return (
-            <div
+            <Link
+              href={`/tournaments/${tournament.id}`}
               key={startIndex + idx}
               className="p-4 rounded-2xl shadow-lg w-full max-w-sm hover:scale-105 transition items-center justify-center mx-auto mb-6"
             >
-              <img
-                src={tournament.image}
-                alt={tournament.game ? `${tournament.game} Tournament` : "Tournament"}
-                className="rounded-xl w-full h-48 object-cover mb-4"
-                loading="lazy"
-              />
+              <div className="relative w-full h-48 mb-4">
+                <Image
+                  src={tournament.image}
+                  alt={tournament.game ? `${tournament.game} Tournament` : "Tournament"}
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="object-cover rounded-xl"
+                />
+              </div>
 
               <h2 className="text-xl font-bold mb-2">{tournament.game} Tournament</h2>
               <p className="text-sm text-gray-400 mb-4">Hosted by RRR Arena</p>
@@ -84,7 +95,7 @@ const TournamentCardHome= () => {
               >
                 Join Now
               </button>
-            </div>
+            </Link>
           );
         })}
       </div>

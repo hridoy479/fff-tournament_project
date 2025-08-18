@@ -1,6 +1,7 @@
 "use client"
 import * as React from "react"
 import { useEffect, useState } from "react"
+import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 
 type Product = {
@@ -43,11 +44,15 @@ export function MobileCarousel() {
       {items.map((item) => (
         <Card key={item.id} className="w-full">
           <CardContent className="flex items-center justify-center p-0 h-48">
-            <img 
-              src={item.image} 
-              alt={item.title} 
-              className="object-cover w-full h-full rounded-xl cursor-pointer hover:scale-110 transition-transform duration-300" 
-            />
+            <div className="relative w-full h-full">
+              <Image
+                src={item.image}
+                alt={item.title}
+                fill
+                sizes="100vw"
+                className="object-cover rounded-xl"
+              />
+            </div>
           </CardContent>
         </Card>
       ))}

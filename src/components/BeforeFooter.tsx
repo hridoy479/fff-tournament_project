@@ -31,6 +31,7 @@ function BeforeFooter() {
                 src="https://www.youtube.com/embed/dQw4w9WgXcQ"
                 title="Free Fire Live"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                loading="lazy"
                 allowFullScreen
                 className="w-full h-full"
                 ></iframe>

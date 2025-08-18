@@ -22,6 +22,7 @@ export default function HomeSlider() {
   }, []);
 
   useEffect(() => {
+    if (slides.length === 0) return;
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 5000)
@@ -44,6 +45,7 @@ export default function HomeSlider() {
               src={slide.image}
               alt={slide.title}
               fill
+              sizes="100vw"
               className="object-cover rounded-2xl"
             />
             <div className="absolute bottom-0 left-0 bg-black bg-opacity-50 text-white p-4 w-full rounded-b-2xl">
