@@ -4,21 +4,22 @@ import React, { useEffect, useState } from "react";
 import Countdown from "react-countdown";
 import { Calendar, Clock, Router } from "lucide-react";
 import axios from "axios";
-
+import { format } from 'date-fns'; // Import date-fns
+import { useRouter } from 'next/navigation'; // Import useRouter
 
 // Import shadcn/ui components
 import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
-import { useRouter } from "next/router";
 
 interface Tournament {
+  id: string; // Assuming you have an ID for each tournament
   game: string;
   date: string;
   image: string;
   entry_fee: string;
   prize: string;
-  joined_players: number;  // Added
-  max_players: number;     // Added
+  joined_players: number;
+  max_players: number;
 }
 
 const ITEMS_PER_PAGE = 6;
@@ -30,10 +31,16 @@ const TournamentCard: React.FC<TournamentCardProps> = ({ selectedGame }) => {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [fetchError, setFetchError] = useState(false);
+  const router = useRouter(); // Initialize the router
 
   useEffect(() => {
     axios.get<Tournament[]>('/tournaments.json')
       .then((res) => setTournaments(res.data))
+      .catch(error => {
+        console.error("Error fetching tournaments:", error);
+        setFetchError(true);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -46,8 +53,18 @@ const TournamentCard: React.FC<TournamentCardProps> = ({ selectedGame }) => {
   const endIndex = startIndex + ITEMS_PER_PAGE;
   const currentTournaments = filteredTournaments.slice(startIndex, endIndex);
 
+  // Function to handle click and navigate to the details page
+  const handleTournamentClick = (tournamentId: string) => {
+      router.push(`/tournaments/${tournamentId}`); // Adjust the path as needed
+  };
+
   return (
     <div className="w-full flex flex-col items-center justify-center px-4">
+        {fetchError && (
+            <div className="text-red-500 mt-4">
+                Error loading tournaments. Please try again later.
+            </div>
+        )}
       {/* Tournament Cards or Skeletons */}
       <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 ">
         {loading
@@ -66,6 +83,8 @@ const TournamentCard: React.FC<TournamentCardProps> = ({ selectedGame }) => {
           ))
           : currentTournaments.map((tournament, idx) => {
             const tournamentDate = new Date(tournament.date);
+            const formattedDate = format(tournamentDate, 'MMMM dd, yyyy'); // Example: October 26, 2023
+            const formattedTime = format(tournamentDate, 'h:mm a');       // Example: 10:30 AM
             const progressPercent = Math.min(
               (tournament.joined_players / tournament.max_players) * 100,
               100
@@ -74,11 +93,12 @@ const TournamentCard: React.FC<TournamentCardProps> = ({ selectedGame }) => {
             return (
               <div
                 key={startIndex + idx}
-                className="p-4 rounded-2xl shadow-lg w-full max-w-sm hover:scale-105 transition items-center justify-center mx-auto mb-6"
+                className="p-4 rounded-2xl shadow-lg w-full max-w-sm hover:scale-105 transition items-center justify-center mx-auto mb-6 bg-white dark:bg-zinc-800  hover:shadow-xl cursor-pointer" // Added dark mode bg and hover shadow, and cursor
+                onClick={() => handleTournamentClick(tournament.id)} // Add onClick to navigate
               >
                 <img
                   src={tournament.image}
-                  alt={tournament.game ? `${tournament.game} Tournament` : "Tournament"}
+                  alt={tournament.game ? `${tournament.game} Tournament` : "Tournament"} // Added alt text
                   className="rounded-xl w-full h-48 object-cover mb-4"
                   loading="lazy"
                 />
@@ -112,34 +132,22 @@ const TournamentCard: React.FC<TournamentCardProps> = ({ selectedGame }) => {
                 {/* Date Section */}
                 <div className="flex items-center gap-2 text-sm dark:text-gray-300 mb-2">
                   <Calendar className="w-4 h-4" />
-                  <span>{tournamentDate.toDateString()}</span>
+                  <span>{formattedDate}</span>
                 </div>
-
                 <div className="flex items-center gap-2 text-sm dark:text-gray-300 mb-4">
-                  <Clock className="w-4 h-4" />
-                  <Countdown
-                    date={tournamentDate}
-                    daysInHours={true}
-                    renderer={({ hours, minutes, seconds, completed }) =>
-                      completed ? (
-                        <span className="text-red-500">Tournament Started!</span>
-                      ) : (
-                        <span>
-                          Starts in: {hours}h {minutes}m {seconds}s
-                        </span>
-                      )
-                    }
-                  />
+                    <Clock className="w-4 h-4" />
+                    <span>{formattedTime}</span>
                 </div>
 
                 <button
                   className={`w-full py-2 rounded-xl font-semibold
                     ${progressPercent >= 100
                       ? "bg-gray-400 text-gray-700 cursor-not-allowed"
-                      : "bg-indigo-600 hover:bg-indigo-700 text-white"
+                      : "bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-purple-500 hover:to-indigo-600 text-white shadow-md hover:shadow-xl transition-shadow" // Gradient, shadow, hover effect
                     }`}
                   type="button"
-                  disabled={progressPercent >= 100} onClick={()=>{}}
+                  disabled={progressPercent >= 100}
+                  onClick={()=>{}} // Replace with your join function
                 >
                   {progressPercent >= 100 ? "Tournament Full" : "Join Now"}
                 </button>

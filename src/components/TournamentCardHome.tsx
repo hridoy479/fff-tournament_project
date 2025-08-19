@@ -8,6 +8,7 @@ import { Calendar, Clock } from "lucide-react";
 const Countdown = dynamic(() => import("react-countdown").then((m) => m.default), { ssr: false });
 
 interface Tournament {
+  id: string;
   game: string;
   date: string;
   image: string;
