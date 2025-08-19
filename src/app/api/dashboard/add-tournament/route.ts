@@ -1,31 +1,28 @@
 import { NextResponse } from 'next/server';
-import { type NextRequest } from 'next/server';
 import mongoose from 'mongoose';
 import { TournamentModel } from '@/models/Tournament';
 
-export async function POST(request: NextRequest) {
+export async function POST(req: Request) {
   try {
-    const body = await request.json();
-    const tournamentData = body;
+    const data = await req.json();
 
-    // Validate category
-    if (!tournamentData.category || !['freefire', 'ludo', 'E FootBall'].includes(tournamentData.category)) {
-      return NextResponse.json(
-        { success: false, message: 'Invalid category. Allowed categories: freefire, ludo, E FootBall' },
-        { status: 400 }
-      );
+    // Validate required fields
+    const required = ['title', 'date', 'image', 'entry_fee', 'prize', 'joined_players', 'max_players', 'category'];
+    for (const key of required) {
+      if (!data[key] && data[key] !== 0) {
+        return NextResponse.json({ success: false, message: `${key} is required` }, { status: 400 });
+      }
     }
 
-    // Convert the date string to a Date object if it exists
-    if (tournamentData.date) {
-      try {
-        tournamentData.date = new Date(tournamentData.date);
-      } catch (error) {
-        return NextResponse.json(
-          { success: false, message: 'Invalid date format' },
-          { status: 400 }
-        );
-      }
+    // Validate category
+    if (!['freefire', 'ludo', 'E Football'].includes(data.category.trim())) {
+      return NextResponse.json({ success: false, message: 'Invalid category' }, { status: 400 });
+    }
+
+    // Convert date
+    const tournamentDate = new Date(data.date);
+    if (isNaN(tournamentDate.getTime())) {
+      return NextResponse.json({ success: false, message: 'Invalid date format' }, { status: 400 });
     }
 
     // Connect to MongoDB
@@ -33,19 +30,17 @@ export async function POST(request: NextRequest) {
       await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/rrr-tournaments');
     }
 
-    // Create tournament
-    const newTournament = new TournamentModel(tournamentData);
-    const savedTournament = await newTournament.save();
+    // Save tournament
+    const tournament = new TournamentModel({
+      ...data,
+      date: tournamentDate,
+    });
 
-    return NextResponse.json(
-      { success: true, data: savedTournament },
-      { status: 201 }
-    );
-  } catch (error) {
-    console.error('Error adding tournament:', error);
-    return NextResponse.json(
-      { success: false, message: 'Failed to add tournament' },
-      { status: 500 }
-    );
+    const saved = await tournament.save();
+
+    return NextResponse.json({ success: true, data: saved }, { status: 201 });
+  } catch (err) {
+    console.error('Add Tournament Error:', err);
+    return NextResponse.json({ success: false, message: 'Failed to add tournament' }, { status: 500 });
   }
 }
