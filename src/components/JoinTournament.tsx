@@ -6,7 +6,8 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogFooter } from "@/components/ui/alert-dialog";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify"; // Keep react-hot-toast for now
+import axios from "axios"; // Import axios
 
 interface JoinTournamentProps {
   tournamentId: number;
@@ -29,21 +30,20 @@ export default function JoinTournament({ tournamentId, entryFee }: JoinTournamen
     try {
       setChecking(true);
       const token = await user.getIdToken();
-      const res = await fetch("/api/user/balance", {
-        method: "GET",
+      // Change to /api/user/profile
+      const res = await axios.get("/api/user/profile", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const raw = await res.text();
-      let json: any;
-      try { json = JSON.parse(raw); } catch { throw new Error(raw || "Failed to check balance"); }
-      if (!res.ok) throw new Error(json.error || "Failed to check balance");
-      if ((json.balance ?? 0) < entryFee) {
+      
+      const userProfile = res.data; // Assuming res.data contains the user profile
+      if ((userProfile.accountBalance ?? 0) < entryFee) { // Check accountBalance
         setInsufficient(true);
         return;
       }
       setOpen(true);
     } catch (e: any) {
-      const msg = e?.message || "Unable to check balance";
+      console.error("Error checking balance:", e);
+      const msg = e.response?.data?.message || "Unable to check balance";
       toast.error(msg);
     } finally {
       setChecking(false);
@@ -59,28 +59,28 @@ export default function JoinTournament({ tournamentId, entryFee }: JoinTournamen
     try {
       setLoading(true);
       const token = await user.getIdToken();
-      const res = await fetch("/api/tournaments/join", {
-        method: "POST",
+      const res = await axios.post("/api/tournaments/join", {
+        tournament_id: tournamentId, // Use tournament_id
+        game_name: gameName, // Use game_name
+      }, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ tournamentId, gameName, entryFee }),
       });
-      const raw = await res.text();
-      let json: any;
-      try { json = JSON.parse(raw); } catch { throw new Error(raw || "Join failed"); }
-      if (!res.ok) throw new Error(json.error || "Join failed");
-      if (json.insufficient) {
-        setOpen(false);
-        setInsufficient(true);
-        return;
-      }
-      toast.success("Joined successfully");
+      
+      // Backend returns { message: 'Successfully joined tournament', player: newPlayer }
+      toast.success(res.data.message || "Joined successfully");
       setOpen(false);
     } catch (e: any) {
-      const msg = e?.message || "Failed to join";
+      console.error("Error joining tournament:", e);
+      const msg = e.response?.data?.message || "Failed to join";
       toast.error(msg);
+      // If the backend indicates insufficient balance, show the alert
+      if (e.response?.status === 402) { // 402 Payment Required for insufficient balance
+        setOpen(false);
+        setInsufficient(true);
+      }
     } finally {
       setLoading(false);
     }
@@ -124,5 +124,3 @@ export default function JoinTournament({ tournamentId, entryFee }: JoinTournamen
     </div>
   );
 }
-
-

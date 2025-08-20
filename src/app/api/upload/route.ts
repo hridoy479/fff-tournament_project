@@ -1,62 +1,58 @@
-import { NextResponse } from 'next/server';
-import formidable, { File, Fields, Files } from 'formidable';
-import fs from 'fs';
+import { NextResponse, NextRequest } from 'next/server';
+import fs from 'fs/promises'; // Use fs.promises for async operations
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import { promisify } from 'util';
-
-const mkdir = promisify(fs.mkdir);
-const rename = promisify(fs.rename);
+import { authenticateAdmin } from '@/lib/auth';
 
 export const config = {
   api: {
-    bodyParser: false, // Disable Next.js body parsing for file upload
+    bodyParser: false, // Ensure body parsing is disabled for file uploads
   },
 };
 
-export async function POST(req: Request) {
-  return new Promise<NextResponse>((resolve) => {
-    const form = formidable({ multiples: false });
+export async function POST(req: NextRequest) {
+  // Authenticate and Authorize
+  const authResult = await authenticateAdmin(req);
+  if (authResult.error) {
+    return NextResponse.json({ error: authResult.error }, { status: authResult.status });
+  }
 
-    form.parse(req as any, async (err: any, fields: Fields, files: Files) => {
-      if (err) {
-        return resolve(
-          NextResponse.json({ success: false, message: 'Upload error' }, { status: 500 })
-        );
-      }
+  try {
+    const formData = await req.formData();
+    const file = formData.get('file') as Blob | null;
 
-      // Get file safely
-      let uploadedFile: File | undefined;
-      const fileField = files.file;
-      if (!fileField) {
-        return resolve(
-          NextResponse.json({ success: false, message: 'No file uploaded' }, { status: 400 })
-        );
-      }
+    if (!file) {
+      return NextResponse.json({ success: false, message: 'No file uploaded' }, { status: 400 });
+    }
 
-      // If it's an array, take the first one
-      uploadedFile = Array.isArray(fileField) ? fileField[0] : fileField;
+    // Basic file type validation
+    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedMimeTypes.includes(file.type)) {
+      return NextResponse.json({ success: false, message: 'Invalid file type. Only images (JPEG, PNG, GIF, WEBP) are allowed.' }, { status: 400 });
+    }
 
-      try {
-        const uploadDir = path.join(process.cwd(), 'public/uploads');
-        if (!fs.existsSync(uploadDir)) {
-          await mkdir(uploadDir, { recursive: true });
-        }
+    // Basic file size validation (5MB limit)
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    if (file.size > MAX_FILE_SIZE) {
+      return NextResponse.json({ success: false, message: 'File size exceeds limit (5MB)' }, { status: 413 });
+    }
 
-        const ext = path.extname(uploadedFile.originalFilename || '');
-        const newFilename = uuidv4() + ext;
-        const newPath = path.join(uploadDir, newFilename);
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const ext = path.extname(file.name || '');
+    const newFilename = uuidv4() + ext;
+    const uploadDir = path.join(process.cwd(), 'public/uploads');
+    const newPath = path.join(uploadDir, newFilename);
 
-        await rename(uploadedFile.filepath, newPath);
+    // Ensure upload directory exists
+    await fs.mkdir(uploadDir, { recursive: true });
 
-        const fileUrl = `/uploads/${newFilename}`;
-        resolve(NextResponse.json({ success: true, url: fileUrl }));
-      } catch (e) {
-        console.error(e);
-        resolve(
-          NextResponse.json({ success: false, message: 'File save error' }, { status: 500 })
-        );
-      }
-    });
-  });
+    // Write the file to the filesystem
+    await fs.writeFile(newPath, buffer);
+
+    const fileUrl = `/uploads/${newFilename}`;
+    return NextResponse.json({ success: true, url: fileUrl });
+  } catch (e: any) {
+    console.error('File upload error:', e);
+    return NextResponse.json({ success: false, message: 'File upload failed' }, { status: 500 });
+  }
 }

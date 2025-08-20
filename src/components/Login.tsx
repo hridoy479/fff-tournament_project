@@ -7,8 +7,7 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
 } from 'firebase/auth';
-import { auth, provider, db } from '@/config/firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { auth, provider } from '@/config/firebase';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -20,6 +19,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'react-toastify';
+import axios from 'axios';
 
 export function Login() {
   const router = useRouter();
@@ -27,26 +27,17 @@ export function Login() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const createUserIfNotExists = async (user: any) => {
-    const userRef = doc(db, 'users', user.uid);
-    const docSnap = await getDoc(userRef);
-
-    if (!docSnap.exists()) {
-      await setDoc(userRef, {
-        uid: user.uid,
-        name: user.displayName || '',
-        email: user.email || '',
-        accountBalance: 0,
-        gameBalance: 0
-      });
-    }
-  };
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      await createUserIfNotExists(userCredential.user);
+      // Call backend to sync user profile to MongoDB
+      const idToken = await userCredential.user.getIdToken();
+      await axios.post('/api/user/sync-profile', {}, {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
       toast.success('Login successful');
       router.push('/');
     } catch (error: unknown) {
@@ -71,7 +62,14 @@ export function Login() {
   const handleGoogleLogin = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
-      await createUserIfNotExists(result.user);
+      // Call backend to sync user profile to MongoDB
+      const idToken = await result.user.getIdToken();
+      await axios.post('/api/user/sync-profile', {}, {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
+
       toast.success('Google login successful');
       router.push('/');
     } catch (error: unknown) {

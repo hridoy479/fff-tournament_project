@@ -6,20 +6,24 @@ import { Calendar, Clock, Router } from "lucide-react";
 import axios from "axios";
 import { format } from 'date-fns'; // Import date-fns
 import { useRouter } from 'next/navigation'; // Import useRouter
+import { auth } from '@/config/firebase'; // Import auth
+import { toast } from 'react-toastify'; // Import toast
 
 // Import shadcn/ui components
 import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
 
 interface Tournament {
-  id: string; // Assuming you have an ID for each tournament
-  game: string;
-  date: string;
-  image: string;
-  entry_fee: string;
-  prize: string;
-  joined_players: number;
-  max_players: number;
+  id: number; // Numeric ID for the tournament
+  title: string; // The name or title of the tournament
+  date: string; // The date and time when the tournament is scheduled
+  entry_fee: number; // The cost to enter the tournament
+  status: 'upcoming' | 'started' | 'completed' | 'cancelled'; // Current status of the tournament
+  image?: string; // URL to the tournament's banner image
+  prize?: string; // Description of the prize
+  joined_players: number; // Current number of players who have joined
+  max_players?: number; // Maximum number of players allowed
+  category: string; // The game category
 }
 
 const ITEMS_PER_PAGE = 6;
@@ -35,26 +39,70 @@ const TournamentCard: React.FC<TournamentCardProps> = ({ selectedGame }) => {
   const router = useRouter(); // Initialize the router
 
   useEffect(() => {
-    axios.get<Tournament[]>('/tournaments.json')
-      .then((res) => setTournaments(res.data))
-      .catch(error => {
+    const fetchTournaments = async () => {
+      try {
+        const response = await axios.get<{ tournaments: Tournament[] }>('/api/tournaments');
+        setTournaments(response.data.tournaments);
+      } catch (error) {
         console.error("Error fetching tournaments:", error);
         setFetchError(true);
-      })
-      .finally(() => setLoading(false));
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTournaments();
   }, []);
 
   const filteredTournaments = selectedGame === "All"
     ? tournaments
-    : tournaments.filter(t => t.game.toLowerCase().includes(selectedGame.toLowerCase()));
+    : tournaments.filter(t => t.category.toLowerCase().includes(selectedGame.toLowerCase()));
 
   const totalPages = Math.ceil(filteredTournaments.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
   const currentTournaments = filteredTournaments.slice(startIndex, endIndex);
 
+  const handleJoinTournament = async (tournamentId: number, category: string) => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      toast.error('You must be logged in to join a tournament.');
+      router.push('/login');
+      return;
+    }
+
+    try {
+      const idToken = await currentUser.getIdToken();
+      const response = await axios.post('/api/tournaments/join', {
+        tournament_id: tournamentId,
+        game_name: category, // Backend expects game_name
+      }, {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
+
+      if (response.data.ok) {
+        toast.success('Successfully joined tournament!');
+        // Optionally, refresh tournament list or update joined_players count
+      } else if (response.data.alreadyJoined) {
+        toast.info('You have already joined this tournament.');
+      } else {
+        toast.error(response.data.message || 'Failed to join tournament.');
+      }
+    } catch (error: any) {
+      console.error('Error joining tournament:', error);
+      toast.error(error.response?.data?.message || 'Failed to join tournament.');
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        toast.error('Unauthorized. Please log in again.');
+        router.push('/login');
+      } else if (error.response?.status === 402) {
+        toast.error('Insufficient balance to join this tournament.');
+      }
+    }
+  };
+
   // Function to handle click and navigate to the details page
-  const handleTournamentClick = (tournamentId: string) => {
+  const handleTournamentClick = (tournamentId: number) => {
       router.push(`/tournaments/${tournamentId}`); // Adjust the path as needed
   };
 
@@ -98,18 +146,18 @@ const TournamentCard: React.FC<TournamentCardProps> = ({ selectedGame }) => {
               >
                 <img
                   src={tournament.image}
-                  alt={tournament.game ? `${tournament.game} Tournament` : "Tournament"} // Added alt text
+                  alt={tournament.title ? `${tournament.title} Tournament` : "Tournament"} // Changed to title
                   className="rounded-xl w-full h-48 object-cover mb-4"
                   loading="lazy"
                 />
 
-                <h2 className="text-xl font-bold mb-2">{tournament.game} Tournament</h2>
+                <h2 className="text-xl font-bold mb-2">{tournament.title}</h2> 
                 <p className="text-sm dark:text-gray-400 mb-4">Hosted by RRR Arena</p>
 
                 <div className="flex justify-between items-center mb-2 text-sm text-gray-800 dark:text-gray-200">
                   <div className="flex flex-col">
                     <span className="font-medium">Entry Fee</span>
-                    <span>{tournament.entry_fee}</span>
+                    <span>₹{tournament.entry_fee}</span> 
                   </div>
                   <div className="flex flex-col text-right">
                     <span className="font-medium">Prize</span>
@@ -143,11 +191,11 @@ const TournamentCard: React.FC<TournamentCardProps> = ({ selectedGame }) => {
                   className={`w-full py-2 rounded-xl font-semibold
                     ${progressPercent >= 100
                       ? "bg-gray-400 text-gray-700 cursor-not-allowed"
-                      : "bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-purple-500 hover:to-indigo-600 text-white shadow-md hover:shadow-xl transition-shadow" // Gradient, shadow, hover effect
+                      : "bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-purple-500 hover:to-indigo-600 text-white shadow-md hover:shadow-xl transition-shadow" 
                     }`}
                   type="button"
                   disabled={progressPercent >= 100}
-                  onClick={()=>{}} // Replace with your join function
+                  onClick={() => handleJoinTournament(tournament.id, tournament.category)}
                 >
                   {progressPercent >= 100 ? "Tournament Full" : "Join Now"}
                 </button>

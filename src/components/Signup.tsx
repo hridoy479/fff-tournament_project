@@ -58,6 +58,14 @@ export default function Signup() {
         email: user.email,
       });
 
+      // Call backend to sync user profile to MongoDB
+      const idToken = await user.getIdToken();
+      await axios.post('/api/user/sync-profile', {}, {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
+
       toast.success('Signup successful! Redirecting...');
       router.push('/tournaments');
     } catch (error) {
