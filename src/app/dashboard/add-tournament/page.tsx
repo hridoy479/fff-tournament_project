@@ -3,329 +3,403 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import { toast } from 'react-toastify'; // Import toast
-import { auth } from '@/config/firebase'; // Import auth
+import { toast } from 'react-toastify';
+import { auth } from '@/config/firebase';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+
+type Numeric = number | '';
 
 const AddTournamentPage = () => {
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
-  const [image, setImage] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageUrl, setImageUrl] = useState('');
   const [preview, setPreview] = useState('');
-  const [entryFee, setEntryFee] = useState<number>(0);
+  const [entryFee, setEntryFee] = useState<Numeric>('');
   const [prize, setPrize] = useState('');
-  const [joinedPlayers, setJoinedPlayers] = useState<number>(0);
-  const [maxPlayers, setMaxPlayers] = useState<number>(0);
+  const [joinedPlayers, setJoinedPlayers] = useState<Numeric>('');
+  const [maxPlayers, setMaxPlayers] = useState<Numeric>('');
   const [category, setCategory] = useState('');
-  const [loading, setLoading] = useState(false); // Add loading state
+  const [description, setDescription] = useState('');
+  const [status, setStatus] = useState('upcoming');
+  const [activeTab, setActiveTab] = useState('details');
+  const [loading, setLoading] = useState(false);
+  const [imageInputMethod, setImageInputMethod] = useState<'upload' | 'url'>('upload');
 
   const router = useRouter();
 
-  const resetForm = () => {
-    setTitle('');
-    setDate('');
-    setTime('');
-    setImage('');
-    setPreview('');
-    setEntryFee(0);
-    setPrize('');
-    setJoinedPlayers(0);
-    setMaxPlayers(0);
-    setCategory('');
-  };
-
-  // Image upload & preview
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Preview
-    const reader = new FileReader();
-    reader.onloadend = () => setPreview(reader.result as string);
-    reader.readAsDataURL(file);
-
-    // Upload
-    setLoading(true); // Set loading for image upload
-    try {
-      const currentUser = auth.currentUser; // Get current Firebase user
-      if (!currentUser) {
-        toast.error('You must be logged in to upload images.');
-        setLoading(false);
-        return;
-      }
-      const idToken = await currentUser.getIdToken(); // Get Firebase ID token
-
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const { data } = await axios.post('/api/upload', formData, {
-        headers: {
-          Authorization: `Bearer ${idToken}`, // Add Authorization header
-          'Content-Type': 'multipart/form-data', // Important for FormData
-        },
-      });
-      if (data.success) {
-        setImage(data.url);
-        toast.success('Image uploaded successfully!');
-      } else {
-        toast.error('Image upload failed.');
-      }
-    } catch (err: any) {
-      console.error(err);
-      toast.error(err.response?.data?.message || 'Upload error.');
-      // Handle 401/403 specifically for redirection
-      if (err.response?.status === 401 || err.response?.status === 403) {
-        toast.error('Unauthorized to upload. Please log in as an admin.');
-        router.push('/login');
-      }
-    } finally {
-      setLoading(false); // Reset loading
+    if (file) {
+      setImageFile(file);
+      setPreview(URL.createObjectURL(file));
     }
   };
 
-  // Form submit
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    // Validation
-    if (!title.trim() || !date || !time || !category || !prize.trim() || !image) {
-      toast.error('Please fill in all required fields.');
-      return;
+  const handleImageUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const url = e.target.value;
+    setImageUrl(url);
+    if (url) {
+      setPreview(url);
     }
+  };
 
-    setLoading(true); // Set loading for form submission
+  const handleNumericChange = (
+    setter: React.Dispatch<React.SetStateAction<Numeric>>
+  ) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setter(value === '' ? '' : Number(value));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
     try {
-      const currentUser = auth.currentUser;
-      if (!currentUser) {
-        toast.error('You must be logged in as an admin to add tournaments.');
-        router.push('/login');
+      const user = auth.currentUser;
+      if (!user) {
+        toast.error('You must be logged in to add a tournament.');
         return;
       }
-      const idToken = await currentUser.getIdToken();
 
-      // Correct category format for backend (ensure it matches backend enum 'E Football')
-      const formattedCategory = category; // Backend expects 'E Football' as is
+      let finalImageUrl = '';
+      if (imageInputMethod === 'upload' && imageFile) {
+        finalImageUrl = await uploadImage(imageFile);
+      } else if (imageInputMethod === 'url' && imageUrl) {
+        finalImageUrl = imageUrl;
+      }
 
-      const tournamentDate = `${date}T${time}:00`;
-      const payload = {
-        title: title.trim(),
-        date: tournamentDate,
-        image: image.trim(),
-        entry_fee: entryFee ? Number(entryFee) : 0,
-        prize: prize.trim(),
-        joined_players: joinedPlayers ? Number(joinedPlayers) : 0,
-        max_players: maxPlayers ? Number(maxPlayers) : 0,
-        category: formattedCategory,
-        status: 'upcoming', // Default status for new tournaments
-      };
-
-      const { data } = await axios.post('/api/admin/tournaments', payload, {
-        headers: {
-          Authorization: `Bearer ${idToken}`,
-        },
+      await axios.post('/api/tournaments', {
+        title,
+        date,
+        image: finalImageUrl,
+        entryFee: entryFee === '' ? 0 : entryFee,
+        prize,
+        joinedPlayers: joinedPlayers === '' ? 0 : joinedPlayers,
+        maxPlayers: maxPlayers === '' ? 0 : maxPlayers,
+        category,
+        description,
+        status,
+        userId: user.uid,
       });
 
-      if (data.ok) { // Backend returns { ok: true, tournament: created }
-        toast.success('Tournament added successfully!');
-        resetForm(); // Reset form fields
-        router.push('/dashboard');
-      } else {
-        toast.error(`Error: ${data.message || data.error || 'Failed to add tournament.'}`);
-      }
-    } catch (err: any) {
-      console.error(err);
-      toast.error(err.response?.data?.message || err.response?.data?.error || 'Failed to add tournament.');
-      // If token is invalid or not admin, redirect to login
-      if (err.response?.status === 401 || err.response?.status === 403) {
-        toast.error('Unauthorized access. Please log in as an admin.');
-        router.push('/login');
-      }
+      toast.success('Tournament added successfully!');
+      router.push('/tournaments');
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to add tournament.');
     } finally {
-      setLoading(false); // Reset loading
+      setLoading(false);
+    }
+  };
+
+  const uploadImage = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await axios.post('/api/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      if (response.data.success) {
+        return response.data.url;
+      } else {
+        throw new Error(response.data.message || 'Image upload failed');
+      }
+    } catch (error: any) {
+      console.error('Error uploading image:', error);
+      throw new Error(error.response?.data?.message || 'Image upload failed');
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10 px-4 sm:px-6">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Create New Tournament</h1>
-          <p className="text-gray-600 mt-2">Fill in all details to set up your tournament</p>
+    <div className="min-h-screen bg-background py-8 px-4 sm:px-6">
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+            Create Tournament
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            Fill in the details to create an exciting new tournament
+          </p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-6">
-            <h2 className="text-xl font-bold text-white">Tournament Information</h2>
-          </div>
-
-          <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-6">
-            {/* Title */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tournament Title <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Enter tournament name"
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                disabled={loading}
-              />
-            </div>
-
-            {/* Category */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Game Category <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                disabled={loading}
-              >
-                <option value="">Select a category</option>
-                <option value="freefire">Free Fire</option>
-                <option value="ludo">Ludo</option>
-                <option value="E Football">E Football</option>
-              </select>
-            </div>
-
-            {/* Date & Time */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Date <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                  disabled={loading}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Time <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="time"
-                  value={time}
-                  onChange={(e) => setTime(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                  disabled={loading}
-                />
-              </div>
-            </div>
-
-            {/* Entry Fee */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Entry Fee</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">₹</div>
-                <input
-                  type="number"
-                  value={entryFee}
-                  onChange={(e) => setEntryFee(Number(e.target.value))}
-                  placeholder="0.00"
-                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                  disabled={loading}
-                />
-              </div>
-            </div>
-
-            {/* Prize */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Prize <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={prize}
-                onChange={(e) => setPrize(e.target.value)}
-                placeholder="e.g. ₹5000 Cash Prize"
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                disabled={loading}
-              />
-            </div>
-
-            {/* Players */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Joined Players</label>
-                <input
-                  type="number"
-                  value={joinedPlayers}
-                  onChange={(e) => setJoinedPlayers(Number(e.target.value))}
-                  placeholder="0"
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                  disabled={loading}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Max Players</label>
-                <input
-                  type="number"
-                  value={maxPlayers}
-                  onChange={(e) => setMaxPlayers(Number(e.target.value))}
-                  placeholder="0"
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                  disabled={loading}
-                />
-              </div>
-            </div>
-
-            {/* Image Upload */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Tournament Banner</label>
-              <input
-                type="text"
-                value={image}
-                onChange={(e) => setImage(e.target.value)}
-                placeholder="Paste image URL or upload"
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition mb-4"
-                disabled={loading}
-              />
-
-              <div className="flex flex-col sm:flex-row gap-4">
-                <label className="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-100 text-center transition">
-                  Upload Image
-                  <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" disabled={loading} />
-                </label>
-
-                {preview && (
-                  <div className="flex-1">
-                    <div className="text-sm text-gray-500 mb-1">Preview</div>
-                    <div className="border border-gray-200 rounded-lg overflow-hidden">
-                      <img src={preview} alt="Preview" className="w-full h-32 object-cover" />
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Form Section */}
+          <Card className="flex-1">
+            <CardHeader>
+              <CardTitle>Tournament Information</CardTitle>
+              <CardDescription>
+                Provide all necessary details for your tournament
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-2 mb-6">
+                  <TabsTrigger value="details">Tournament Details</TabsTrigger>
+                  <TabsTrigger value="settings">Settings & Rules</TabsTrigger>
+                </TabsList>
+                
+                <form onSubmit={handleSubmit}>
+                  <TabsContent value="details" className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="title">Tournament Title *</Label>
+                      <Input
+                        id="title"
+                        placeholder="Enter tournament title"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        required
+                      />
                     </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="description">Description</Label>
+                      <Textarea
+                        id="description"
+                        placeholder="Describe your tournament"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        rows={3}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="date">Date & Time *</Label>
+                        <Input
+                          id="date"
+                          type="datetime-local"
+                          value={date}
+                          onChange={(e) => setDate(e.target.value)}
+                          required
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="category">Category</Label>
+                        <Select value={category} onValueChange={setCategory}>
+                          <SelectTrigger id="category">
+                            <SelectValue placeholder="Select a category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Free Fire">Free Fire</SelectItem>
+                            <SelectItem value="E FootBall">E FootBall</SelectItem>
+                            <SelectItem value="Ludo">Ludo</SelectItem>
+                            <SelectItem value="Other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          id="image-method"
+                          checked={imageInputMethod === 'url'}
+                          onCheckedChange={(checked) => setImageInputMethod(checked ? 'url' : 'upload')}
+                        />
+                        <Label htmlFor="image-method" className="cursor-pointer">
+                          {imageInputMethod === 'upload' ? 'Upload Image' : 'Use Image URL'}
+                        </Label>
+                      </div>
+
+                      {imageInputMethod === 'upload' ? (
+                        <div className="space-y-2">
+                          <Label htmlFor="image-upload">Tournament Image</Label>
+                          <Input
+                            id="image-upload"
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                          />
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <Label htmlFor="image-url">Image URL</Label>
+                          <Input
+                            id="image-url"
+                            type="url"
+                            placeholder="https://example.com/image.jpg"
+                            value={imageUrl}
+                            onChange={handleImageUrlChange}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="pt-4 flex justify-end">
+                      <Button 
+                        type="button" 
+                        onClick={() => setActiveTab('settings')}
+                      >
+                        Next: Settings
+                      </Button>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="settings" className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="status">Status</Label>
+                        <Select value={status} onValueChange={setStatus}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="upcoming">Upcoming</SelectItem>
+                            <SelectItem value="running">Running</SelectItem>
+                            <SelectItem value="finished">Finished</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="entryFee">Entry Fee ($)</Label>
+                        <Input
+                          id="entryFee"
+                          type="number"
+                          placeholder="0.00"
+                          value={entryFee}
+                          onChange={handleNumericChange(setEntryFee)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="prize">Prize Pool</Label>
+                      <Input
+                        id="prize"
+                        placeholder="e.g., $10,000"
+                        value={prize}
+                        onChange={(e) => setPrize(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="joinedPlayers">Joined Players</Label>
+                        <Input
+                          id="joinedPlayers"
+                          type="number"
+                          placeholder="0"
+                          value={joinedPlayers}
+                          onChange={handleNumericChange(setJoinedPlayers)}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="maxPlayers">Maximum Players *</Label>
+                        <Input
+                          id="maxPlayers"
+                          type="number"
+                          placeholder="100"
+                          value={maxPlayers}
+                          onChange={handleNumericChange(setMaxPlayers)}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col-reverse sm:flex-row gap-4 justify-between pt-6">
+                      <Button 
+                        type="button" 
+                        variant="outline"
+                        onClick={() => setActiveTab('details')}
+                      >
+                        Back to Details
+                      </Button>
+                      <Button 
+                        type="submit" 
+                        disabled={loading}
+                        className="min-w-[140px]"
+                      >
+                        {loading ? (
+                          <>
+                            <span className="animate-spin mr-2">⏳</span>
+                            Creating...
+                          </>
+                        ) : (
+                          'Create Tournament'
+                        )}
+                      </Button>
+                    </div>
+                  </TabsContent>
+                </form>
+              </Tabs>
+            </CardContent>
+          </Card>
+
+          {/* Preview Section */}
+          <Card className="lg:w-96">
+            <CardHeader>
+              <CardTitle>Tournament Preview</CardTitle>
+              <CardDescription>How your tournament will appear to users</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-lg border overflow-hidden">
+                {preview ? (
+                  <img src={preview} alt="Tournament preview" className="w-full h-48 object-cover" />
+                ) : (
+                  <div className="w-full h-48 bg-muted flex items-center justify-center">
+                    <span className="text-muted-foreground">No image selected</span>
                   </div>
                 )}
-              </div>
-            </div>
-
-            {/* Buttons */}
-            <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
-              <button
-                type="button"
-                onClick={() => router.push('/dashboard')}
-                className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition font-medium"
-                disabled={loading}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition font-medium shadow-md"
-                disabled={loading}
                 
-              >
-                {loading ? 'Creating...' : 'Create Tournament'}
-              </button>
-            </div>
-          </form>
+                <div className="p-4">
+                  <h3 className="font-bold text-lg mb-2">{title || "Tournament Title"}</h3>
+                  {description && (
+                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                      {description}
+                    </p>
+                  )}
+                  
+                  <div className="flex justify-between items-center mb-3">
+                    <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
+                      {status}
+                    </span>
+                    <span className="font-bold text-primary">
+                      {entryFee ? `$${entryFee}` : 'Free'} Entry
+                    </span>
+                  </div>
+                  
+                  <div className="text-sm text-muted-foreground mb-4">
+                    <div className="flex items-center mb-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                      <span>{joinedPlayers || 0}/{maxPlayers || '∞'} Players</span>
+                    </div>
+                    
+                    <div className="flex items-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span>{date ? new Date(date).toLocaleString() : 'Date not set'}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="rounded-lg bg-muted p-3 mb-4">
+                    <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Prize Pool</div>
+                    <div className="font-bold text-lg">{prize || 'TBD'}</div>
+                  </div>
+                  
+                  <div className="text-xs text-muted-foreground mb-2">Category: {category || 'Not specified'}</div>
+                  
+                  <Button className="w-full">Join Tournament</Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
