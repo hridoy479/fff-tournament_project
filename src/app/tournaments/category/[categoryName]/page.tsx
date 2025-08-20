@@ -1,4 +1,3 @@
-// src/app/tournaments/category/[categoryName]/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -7,10 +6,10 @@ import axios from 'axios';
 import TournamentCard from '@/components/TournamentCard';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import CategoryTournamentCard from '@/components/CategoryTournamentCard';
 
 interface Tournament {
   _id: string;
-  id: number;
   title: string;
   date: string;
   image?: string;
@@ -25,38 +24,38 @@ interface Tournament {
 
 export default function CategoryTournamentsPage() {
   const params = useParams();
-  const categoryName = params.categoryName as string;
+  const categoryParam = params.categoryName;
+  const categoryName = Array.isArray(categoryParam) ? categoryParam[0] : categoryParam || '';
+
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (categoryName) {
-      const fetchTournamentsByCategory = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-          // ✅ Use raw categoryName directly
-          const response = await axios.get(`/api/tournaments?category=${encodeURIComponent(categoryName)}`);
-          setTournaments(response.data.tournaments || []);
-        } catch (err: any) {
-          console.error(`Failed to fetch tournaments for category ${categoryName}:`, err);
-          setError('Failed to load tournaments for this category.');
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchTournamentsByCategory();
-    }
+    if (!categoryName) return;
+
+    const fetchTournamentsByCategory = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await axios.get(`/api/tournaments?category=${encodeURIComponent(categoryName)}`);
+        setTournaments(response.data.tournaments || []);
+      } catch (err: any) {
+        console.error(`Failed to fetch tournaments for category ${categoryName}:`, err);
+        setError('Failed to load tournaments for this category.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTournamentsByCategory();
   }, [categoryName]);
 
-  // Format category name for display
-  const formatCategoryName = (name: string) => {
-    return decodeURIComponent(name)
+  const formatCategoryName = (name: string) =>
+    decodeURIComponent(name)
       .split('-')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
-  };
 
   const displayCategoryName = formatCategoryName(categoryName);
 
@@ -103,24 +102,9 @@ export default function CategoryTournamentsPage() {
 
         {!loading && !error && tournaments.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {tournaments.map((tournament) => {
-              // Transform the tournament data to match what TournamentCard expects
-              const tournamentCardData = {
-                _id: tournament._id,
-                title: tournament.title,
-                date: tournament.date,
-                image: tournament.image,
-                entry_fee: tournament.entry_fee,
-                prize: tournament.prize,
-                joined_players: tournament.joined_players,
-                max_players: tournament.max_players,
-                category: tournament.category,
-                description: tournament.description,
-                status: tournament.status
-              };
-
-              return <TournamentCard key={tournament._id} tournament={tournamentCardData} />;
-            })}
+            {tournaments.map(tournament => (
+              <CategoryTournamentCard key={tournament._id} tournament={tournament} />
+            ))}
           </div>
         )}
       </div>

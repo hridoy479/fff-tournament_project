@@ -1,76 +1,136 @@
 'use client';
 
-import { Card } from "@/components/ui/card"
-import { useEffect, useState } from "react"
-import axios from "axios"
+import { useEffect, useState } from "react";
+import axios from "axios";
 
-type Category = {
-  id: number
-  title: string
-  match: number
-  progress: number
-  image: string
-  color: string
-  url: string
+interface Category {
+  title: string;
+  category: string;
+  match: number;
+  color: string;
 }
-interface CategoryListProps {
+
+interface CategoryCardProps {
   onSelectGame: (game: string) => void;
 }
-export function CategoryCard({onSelectGame}:CategoryListProps) {
-  const [selectedGame, setSelectedGame] = useState<string>("All");
-  const [showList, setShowList] = useState(false)
-  const [categories, setCategories] = useState<Category[]>([])
+
+export function CategoryCard({ onSelectGame }: CategoryCardProps) {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   useEffect(() => {
-    axios.get<Category[]>('/gaming.json')
-      .then(res => setCategories(res.data))
-      .catch(err => console.error('Failed to fetch categories:', err))
-  }, [])
+    const fetchCategories = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get("/api/tournaments", {
+          params: { limit: 50, page }
+        });
+        const tournaments = response.data.tournaments || [];
 
-  const getColorClass = (color: string) => {
-    switch (color) {
-      case "green":
-        return "bg-green-600 text-white"
-      case "yellow":
-        return "bg-yellow-500 text-black"
+        const categoryMap: { [key: string]: Category } = {};
+        tournaments.forEach((t: any) => {
+          if (!categoryMap[t.category]) {
+            categoryMap[t.category] = {
+              title: t.category.charAt(0).toUpperCase() + t.category.slice(1),
+              category: t.category,
+              match: 1,
+              color: ["freefire", "efootball"].includes(t.category) ? "blue" : "purple",
+            };
+          } else {
+            categoryMap[t.category].match += 1;
+          }
+        });
+
+        setCategories(Object.values(categoryMap));
+      } catch (err) {
+        console.error("Failed to fetch categories:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, [page]);
+
+  const getGradient = (color: string) => {
+    switch (color.toLowerCase()) {
       case "blue":
-        return "bg-blue-500 text-white"
+        return "bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-indigo-600 hover:to-blue-500";
+      case "green":
+        return "bg-gradient-to-r from-green-400 to-green-600 hover:from-green-600 hover:to-green-400";
+      case "purple":
+        return "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-pink-500 hover:to-purple-500";
       default:
-        return "bg-gray-500 text-white"
+        return "bg-gray-400 hover:bg-gray-500";
     }
-  }
-
- 
+  };
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 items-center lg:justify-center lg:flex">
-      <div className="grid grid-cols-2 gap-4">
-        {categories.map((category) => (
-          <button
-            onClick={() => onSelectGame(category.title)}
-            key={category.id}
-            className="relative group rounded-xl overflow-hidden transition-all hover:shadow-lg"
-            type="button"
-          >
-            <Card className="w-[300px] h-[120px] relative p-0 border border-gray-200 shadow-md hover:scale-105 transition-transform duration-300">
-              <img
-                src={category.image || "/placeholder.jpg"}
-                alt={category.title}
-                loading="lazy"
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-              />
-              <div className="absolute bottom-0 w-full bg-black/60 p-2 md:text-center text-left">
-                <h3 className="text-sm font-bold text-white truncate">{category.title}</h3>
-                <span className={`text-[11px] px-2 py-[2px] mt-1 inline-block rounded ${getColorClass(category.color)}`}>
-                  {category.match} Matches
-                </span>
-              </div>
-            </Card>
-          </button>
-        ))}
-      </div>
+    <div className="px-4 sm:px-6 lg:px-8 py-6">
+      <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6 text-center">
+        Select a Game Category
+      </h2>
 
-      
+      {loading ? (
+        <div className="flex flex-wrap gap-4 justify-center">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-20 w-40 rounded-xl bg-gray-300 dark:bg-zinc-700 animate-pulse"
+            ></div>
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-wrap gap-4 justify-center">
+          {/* All Games Button */}
+          <button
+            onClick={() => onSelectGame("All")}
+            className="relative h-20 w-40 rounded-xl text-white font-semibold shadow-lg transition-transform transform hover:scale-105 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-pink-500 hover:to-purple-500 flex flex-col items-center justify-center"
+          >
+            <span className="text-lg truncate">All Games</span>
+            <span className="mt-1 text-sm bg-white/20 px-2 py-1 rounded-full">
+              {categories.reduce((acc, cat) => acc + cat.match, 0)} Matches
+            </span>
+          </button>
+
+          {categories.map((cat) => (
+            <button
+              key={cat.category}
+              onClick={() => onSelectGame(cat.category)}
+              className={`relative h-20 w-40 rounded-xl text-white font-semibold shadow-lg transition-transform transform hover:scale-105 ${getGradient(cat.color)} flex flex-col items-center justify-center`}
+            >
+              <span className="text-lg truncate">{cat.title}</span>
+              <span className="mt-1 text-sm bg-white/20 px-2 py-1 rounded-full">
+                {cat.match} Matches
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {!loading && categories.length > ITEMS_PER_PAGE && (
+        <div className="flex justify-center mt-6 gap-2">
+          <button
+            className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50"
+            onClick={() => setPage((p) => Math.max(p - 1, 1))}
+            disabled={page === 1}
+          >
+            Prev
+          </button>
+          <span className="px-3 py-2 rounded bg-gray-100 dark:bg-zinc-700 text-gray-800 dark:text-gray-200">
+            Page {page}
+          </span>
+          <button
+            className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+            onClick={() => setPage((p) => p + 1)}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
-  )
+  );
 }

@@ -48,6 +48,7 @@ export default function Header() {
     { name: "Ludo King", href: "/tournaments/category/ludoking", icon: <Dice5 className="h-4 w-4" /> },
     { name: "E-Football", href: "/tournaments/category/efootball", icon: <Crown className="h-4 w-4" /> },
     { name: "Mobile Legends", href: "/tournaments/category/mobilelegends", icon: <Smartphone className="h-4 w-4" /> },
+    {name:"All Tournaments",href:"/tournaments"}
   ];
 
   return (

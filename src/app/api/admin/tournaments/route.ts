@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { TournamentModel } from '@/models/Tournament';
-import { withDbConnection } from '@/lib/db';
+import { connectMongo } from '@/config/mongodb';
 import { createTournament } from '@/services/tournamentService';
 import { authenticateAdmin } from '@/lib/auth';
 import { z } from 'zod'; // Keep z for ZodError instance check
@@ -24,13 +24,14 @@ function handleError(error: any, context: string) {
 export async function GET(req: NextRequest) {
   const handler = async (req: NextRequest) => {
     try {
+      await connectMongo();
       const tournaments = await TournamentModel.find({}).sort({ date: 1 }).lean();
       return NextResponse.json({ tournaments }, { status: 200 });
     } catch (error) {
       return handleError(error, 'AdminTournamentsGET');
     }
   };
-  return withDbConnection(authenticateAdmin(handler))(req, new NextResponse());
+  return authenticateAdmin(handler)(req, new NextResponse());
 }
 
 /**
@@ -40,6 +41,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const handler = async (req: NextRequest) => {
     try {
+      await connectMongo();
       const body = await req.json();
       const savedTournament = await createTournament(body);
       return NextResponse.json({ success: true, data: savedTournament }, { status: 201 });
@@ -47,5 +49,5 @@ export async function POST(req: NextRequest) {
       return handleError(error, 'AdminTournamentsPOST');
     }
   };
-  return withDbConnection(authenticateAdmin(handler))(req, new NextResponse());
+  return authenticateAdmin(handler)(req, new NextResponse());
 }

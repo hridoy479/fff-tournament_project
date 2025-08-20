@@ -1,4 +1,3 @@
-// /app/api/tournaments/route.ts
 import { NextResponse } from 'next/server';
 import { connectMongo } from '@/config/mongodb';
 import { TournamentModel } from '@/models/Tournament';
@@ -11,7 +10,16 @@ export async function GET(req: NextRequest) {
     const category = searchParams.get('category');
 
     let query: any = {};
-    if (category) query.category = decodeURIComponent(category);
+    if (category) {
+      // Normalize the incoming category name to match database format (e.g., "freefire" -> "Free Fire")
+      const normalizedCategory = decodeURIComponent(category)
+        .replace(/-/g, ' ') // Replace hyphens with spaces
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize each word
+        .join(' ');
+
+      query.category = { $regex: new RegExp(`^${normalizedCategory}$`, 'i') };
+    }
 
     const tournaments = await TournamentModel.find(query).sort({ date: 1 }).lean();
     return NextResponse.json({ tournaments });
@@ -27,7 +35,15 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { title, date, image, entryFee, prize, joinedPlayers, maxPlayers, category, description, status, userId } = body;
 
-    if (!title || !date || !maxPlayers || !userId) {
+    // Ensure numeric fields are actual numbers
+    const parsedEntryFee = Number(entryFee);
+    const parsedJoinedPlayers = Number(joinedPlayers);
+    const parsedMaxPlayers = Number(maxPlayers);
+
+    // Parse date string to Date object
+    const parsedDate = date ? new Date(date) : undefined;
+
+    if (!title || !parsedDate || !parsedMaxPlayers || !userId) {
       return NextResponse.json(
         { message: "Missing required fields: title, date, maxPlayers, and userId are required." },
         { status: 400 }
@@ -36,12 +52,12 @@ export async function POST(req: NextRequest) {
 
     const tournament = await TournamentModel.create({
       title,
-      date,
+      date: parsedDate, // Use the parsed Date object
       image,
-      entry_fee: entryFee,
+      entry_fee: parsedEntryFee,
       prize,
-      joined_players: joinedPlayers,
-      max_players: maxPlayers,
+      joined_players: parsedJoinedPlayers,
+      max_players: parsedMaxPlayers,
       category,
       description,
       status,

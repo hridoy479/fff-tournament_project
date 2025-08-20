@@ -1,20 +1,12 @@
 'use client'
 import { CategoryCard } from '@/components/CategoryCard'
 import TournamentCard from '@/components/TournamentCard'
-import Link from "next/link";
+
 import { usePathname } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Menu, Home, Gamepad2, Users2 } from "lucide-react";
-import { ModeToggle } from '@/components/ui/ModeTogle'
+
 import { useState } from 'react';
 
-const navLinks = [
-  { name: "Home", href: "/", icon: <Home className="h-4 w-4" /> },
-  { name: "Tournaments", href: "/tournaments", icon: <Gamepad2 className="h-4 w-4" /> },
-  { name: "Contact", href: "/contact", icon: <Users2 className="h-4 w-4" /> },
-];
+
 
 function TournamentList() {
    const [selectedGame, setSelectedGame] = useState<string>("All");

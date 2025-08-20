@@ -192,9 +192,9 @@ const AddTournamentPage = () => {
                             <SelectValue placeholder="Select a category" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="Free Fire">Free Fire</SelectItem>
-                            <SelectItem value="E FootBall">E FootBall</SelectItem>
-                            <SelectItem value="Ludo">Ludo</SelectItem>
+                            <SelectItem value="freefire">Free Fire</SelectItem>
+                            <SelectItem value="efootball">E FootBall</SelectItem>
+                            <SelectItem value="ludoking">Ludo</SelectItem>
                             <SelectItem value="Other">Other</SelectItem>
                           </SelectContent>
                         </Select>
@@ -257,8 +257,8 @@ const AddTournamentPage = () => {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="upcoming">Upcoming</SelectItem>
-                            <SelectItem value="running">Running</SelectItem>
-                            <SelectItem value="finished">Finished</SelectItem>
+                            <SelectItem value="started">Started</SelectItem>
+                            <SelectItem value="completed">Completed</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
