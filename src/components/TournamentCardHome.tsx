@@ -1,107 +1,261 @@
 'use client';
 
 import React, { useEffect, useState } from "react";
-import dynamic from "next/dynamic";
-import Image from "next/image";
 import Link from "next/link";
-import { Calendar, Clock } from "lucide-react";
-const Countdown = dynamic(() => import("react-countdown").then((m) => m.default), { ssr: false });
+import Image from "next/image";
+import { Calendar, Clock, Users, Trophy, CreditCard, Sparkles, Zap, Crown } from "lucide-react";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { format, differenceInSeconds } from "date-fns";
 
 interface Tournament {
   id: string;
   game: string;
   date: string;
-  image: string;
+  image?: string;
+  entry_fee: number;
+  prize?: string;
+  joined_players: number;
+  max_players?: number;
+  status: "upcoming" | "running" | "finished";
+  game_type?: string;
 }
 
-const ITEMS_PER_PAGE = 6;
+interface TimeLeft {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+}
 
-const TournamentCardHome= () => {
-  const [tournaments, setTournaments] = useState<Tournament[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
+const statusColors: Record<string, string> = {
+  upcoming: 'bg-gradient-to-r from-blue-500 to-indigo-600',
+  running: 'bg-gradient-to-r from-green-500 to-emerald-600',
+  finished: 'bg-gradient-to-r from-amber-500 to-orange-600',
+};
+
+const statusIcons: Record<string, JSX.Element> = {
+  upcoming: <Sparkles className="h-3 w-3 mr-1" />,
+  running: <Zap className="h-3 w-3 mr-1" />,
+  finished: <Crown className="h-3 w-3 mr-1" />,
+};
+
+const CountdownTimer: React.FC<{ targetDate: Date }> = ({ targetDate }) => {
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0
+  });
 
   useEffect(() => {
-    fetch('/tournaments.json')
+    const calculateTimeLeft = () => {
+      const now = new Date();
+      const difference = differenceInSeconds(targetDate, now);
+      
+      if (difference > 0) {
+        setTimeLeft({
+          days: Math.floor(difference / (60 * 60 * 24)),
+          hours: Math.floor((difference % (60 * 60 * 24)) / (60 * 60)),
+          minutes: Math.floor((difference % (60 * 60)) / 60),
+          seconds: Math.floor(difference % 60)
+        });
+      }
+    };
+
+    calculateTimeLeft();
+    const timer = setInterval(calculateTimeLeft, 1000);
+
+    return () => clearInterval(timer);
+  }, [targetDate]);
+
+  if (timeLeft.days + timeLeft.hours + timeLeft.minutes + timeLeft.seconds <= 0) {
+    return (
+      <div className="text-center font-medium text-white py-1 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg">
+        Starting now!
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex justify-center gap-2">
+      {timeLeft.days > 0 && (
+        <div className="bg-white/10 rounded p-2 min-w-[50px] text-center">
+          <div className="text-lg font-bold text-white">{timeLeft.days}</div>
+          <div className="text-xs text-white/80">Days</div>
+        </div>
+      )}
+      <div className="bg-white/10 rounded p-2 min-w-[50px] text-center">
+        <div className="text-lg font-bold text-white">{timeLeft.hours.toString().padStart(2, '0')}</div>
+        <div className="text-xs text-white/80">Hours</div>
+      </div>
+      <div className="bg-white/10 rounded p-2 min-w-[50px] text-center">
+        <div className="text-lg font-bold text-white">{timeLeft.minutes.toString().padStart(2, '0')}</div>
+        <div className="text-xs text-white/80">Mins</div>
+      </div>
+      <div className="bg-white/10 rounded p-2 min-w-[50px] text-center">
+        <div className="text-lg font-bold text-white">{timeLeft.seconds.toString().padStart(2, '0')}</div>
+        <div className="text-xs text-white/80">Secs</div>
+      </div>
+    </div>
+  );
+};
+
+const TournamentCardHome: React.FC = () => {
+  const [tournaments, setTournaments] = useState<Tournament[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    fetch("/api/tournaments")
       .then(async (res) => {
-        if (!res.ok) throw new Error('Failed to fetch tournaments')
-        const data = (await res.json()) as Tournament[]
-        setTournaments(data)
+        if (!res.ok) throw new Error("Failed to fetch tournaments");
+        const data = await res.json();
+        const arr = Array.isArray(data) ? data : data.tournaments ?? [];
+        setTournaments(arr);
       })
-      .catch(() => {})
+      .catch(() => setTournaments([]))
       .finally(() => setLoading(false));
   }, []);
 
+  const handleImageError = (id: string) => {
+    setImageErrors(prev => ({ ...prev, [id]: true }));
+  };
+
   if (loading) {
-    return <div className="text-center py-10">Loading tournaments...</div>;
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {Array.from({ length: 6 }).map((_, idx) => (
+          <Card key={idx} className="w-full overflow-hidden rounded-2xl border-0 shadow-lg">
+            <Skeleton className="h-40 w-full rounded-none" />
+            <CardContent className="p-5 space-y-4">
+              <Skeleton className="h-6 w-3/4" />
+              <div className="flex justify-between">
+                <Skeleton className="h-4 w-1/3" />
+                <Skeleton className="h-4 w-1/3" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <Skeleton className="h-16 rounded-xl" />
+                <Skeleton className="h-16 rounded-xl" />
+              </div>
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-10 w-full rounded-xl" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
   }
 
-  // Pagination logic
-  const totalPages = Math.ceil(tournaments.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
-  const currentTournaments = tournaments.slice(startIndex, endIndex);
-
   return (
-    <div className="w-full flex flex-col items-center justify-center">
-      {/* Tournament Cards */}
-      <div className="w-full flex flex-wrap justify-center">
-        {currentTournaments.map((tournament, idx) => {
-          const tournamentDate = new Date(tournament.date);
+    <div className="grid grid-cols-1 md:grid-cols-2 w-full  lg:grid-cols-3 gap-6">
+      {tournaments.map((tournament) => {
+        const tournamentDate = new Date(tournament.date);
+        const formattedDate = format(tournamentDate, "MMM dd, yyyy");
+        const formattedTime = format(tournamentDate, "h:mm a");
+        const progressPercent = Math.min(
+          (tournament.joined_players / (tournament.max_players || 1)) * 100,
+          100
+        );
 
-          return (
-            <Link
-              href={`/tournaments/${tournament.id}`}
-              key={startIndex + idx}
-              className="p-4 rounded-2xl shadow-lg w-full max-w-sm hover:scale-105 transition items-center justify-center mx-auto mb-6"
-            >
-              <div className="relative w-full h-48 mb-4">
+        return (
+          <Card key={tournament.id}  className="max-w-md overflow-hidden rounded-2xl border-0 shadow-lg transition-all duration-300 hover:shadow-xl ">
+            <div className="relative h-40 w-full">
+              {tournament.image && !imageErrors[tournament.id] ? (
                 <Image
                   src={tournament.image}
-                  alt={tournament.game ? `${tournament.game} Tournament` : "Tournament"}
+                  alt={tournament.game}
                   fill
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  className="object-cover rounded-xl"
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  onError={() => handleImageError(tournament.id)}
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
+                  <Trophy className="h-10 w-10 text-white" />
+                </div>
+              )}
+
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+
+              <Badge className={`absolute top-4 right-4 ${statusColors[tournament.status]} border-0 px-3 py-1 text-xs font-bold flex items-center backdrop-blur-sm text-white`}>
+                {statusIcons[tournament.status]}
+                {tournament.status.charAt(0).toUpperCase() + tournament.status.slice(1)}
+              </Badge>
+
+              <div className="absolute bottom-4 left-4 text-white">
+                <h3 className="text-xl font-bold">{tournament.game}</h3>
+                {tournament.game_type && (
+                  <p className="text-sm text-white/80 mt-1">{tournament.game_type}</p>
+                )}
+              </div>
+            </div>
+
+            <CardContent className="p-5">
+              <div className="flex justify-between text-sm text-muted-foreground mb-4">
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="h-4 w-4 text-blue-500" />
+                  <span>{formattedDate}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Clock className="h-4 w-4 text-blue-500" />
+                  <span>{formattedTime}</span>
+                </div>
+              </div>
+
+              {tournament.status === "upcoming" && (
+                <div className="mb-4 p-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl">
+                  <p className="text-xs font-semibold text-white/90 mb-2 text-center">TOURNAMENT STARTS IN</p>
+                  <CountdownTimer targetDate={tournamentDate} />
+                </div>
+              )}
+
+              <div className="mb-4 grid grid-cols-2 gap-3">
+                <div className="flex flex-col items-center rounded-xl bg-blue-50 p-3 border border-blue-100 dark:bg-blue-950/30 dark:border-blue-800/30">
+                  <CreditCard className="h-5 w-5 text-blue-600 dark:text-blue-400 mb-1.5" />
+                  <span className="text-sm font-bold text-blue-700 dark:text-blue-300">₹{tournament.entry_fee}</span>
+                  <span className="text-xs text-blue-600/80 dark:text-blue-400/80">Entry Fee</span>
+                </div>
+                <div className="flex flex-col items-center rounded-xl bg-amber-50 p-3 border border-amber-100 dark:bg-amber-950/30 dark:border-amber-800/30">
+                  <Trophy className="h-5 w-5 text-amber-600 dark:text-amber-400 mb-1.5" />
+                  <span className="text-sm font-bold text-amber-700 dark:text-amber-300">{tournament.prize || "N/A"}</span>
+                  <span className="text-xs text-amber-600/80 dark:text-amber-400/80">Prize Pool</span>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm">
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <Users className="h-4 w-4 text-purple-500" />
+                    <span>{tournament.joined_players} Joined</span>
+                  </div>
+                  {tournament.max_players && (
+                    <span className="text-muted-foreground">{tournament.max_players} Max</span>
+                  )}
+                </div>
+                <Progress value={progressPercent} className="h-2 bg-gray-200 dark:bg-gray-800 rounded-full" 
+                  indicatorClassName={`rounded-full ${progressPercent >= 90 ? 'bg-red-500' : 'bg-gradient-to-r from-purple-500 to-blue-500'}`} 
                 />
               </div>
+            </CardContent>
 
-              <h2 className="text-xl font-bold mb-2">{tournament.game} Tournament</h2>
-              <p className="text-sm text-gray-400 mb-4">Hosted by RRR Arena</p>
-
-              <div className="flex items-center gap-2 text-sm text-gray-300 mb-2">
-                <Calendar className="w-4 h-4" />
-                <span>{tournamentDate.toDateString()}</span>
-              </div>
-
-              <div className="flex items-center gap-2 text-sm text-gray-300 mb-4">
-                <Clock className="w-4 h-4" />
-                <Countdown
-                  date={tournamentDate}
-                  daysInHours={true}
-                  renderer={({ hours, minutes, seconds, completed }) =>
-                    completed ? (
-                      <span className="text-red-500">Tournament Started!</span>
-                    ) : (
-                      <span>
-                        Starts in: {hours}h {minutes}m {seconds}s
-                      </span>
-                    )
-                  }
-                />
-              </div>
-
-              <button
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-xl font-semibold"
-                type="button"
+            <CardFooter className="px-5 pb-5 pt-2">
+              <Button 
+                className="w-full text-sm h-11 rounded-xl font-bold transition-all duration-300" 
+                variant={tournament.status === "upcoming" ? "default" : tournament.status === "running" ? "secondary" : "outline"}
+                size="lg"
               >
-                Join Now
-              </button>
-            </Link>
-          );
-        })}
-      </div>
-
-      </div>
+                {tournament.status === "upcoming" ? "Join Tournament" : tournament.status === "running" ? "Spectate Now" : "View Results"}
+                {tournament.status === "upcoming" && <Sparkles className="ml-2 h-4 w-4" />}
+              </Button>
+            </CardFooter>
+          </Card>
+        );
+      })}
+    </div>
   );
 };
 

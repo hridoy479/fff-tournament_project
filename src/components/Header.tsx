@@ -71,8 +71,8 @@ export default function Header() {
           <Link
             href="/"
             className={`flex items-center space-x-1 font-medium px-3 py-2 rounded-md transition-colors ${pathname === "/"
-                ? "bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400"
-                : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              ? "bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400"
+              : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
               }`}
           >
             <Home className="h-4 w-4" />
@@ -85,8 +85,8 @@ export default function Header() {
               <Button
                 variant="ghost"
                 className={`flex items-center space-x-1 font-medium px-3 py-2 rounded-md ${pathname.startsWith("/tournaments")
-                    ? "bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400"
-                    : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                  ? "bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400"
+                  : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                   }`}
               >
                 <Gamepad2 className="h-4 w-4" />
@@ -112,8 +112,8 @@ export default function Header() {
           <Link
             href="/contact"
             className={`flex items-center space-x-1 font-medium px-3 py-2 rounded-md transition-colors ${pathname === "/contact"
-                ? "bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400"
-                : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              ? "bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400"
+              : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
               }`}
           >
             <Users2 className="h-4 w-4" />
@@ -122,8 +122,8 @@ export default function Header() {
           <Link
             href="/joined-tournaments"
             className={`flex items-center space-x-1 font-medium px-3 py-2 rounded-md transition-colors ${pathname === "/joined-tournaments"
-                ? "bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400"
-                : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              ? "bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400"
+              : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
               }`}
           >
             <Gamepad2 className="h-4 w-4" />
@@ -250,51 +250,50 @@ export default function Header() {
                       href="/"
                       onClick={closeMobileMenu}
                       className={`flex items-center space-x-2 p-3 rounded-lg transition-colors ${pathname === "/"
-                          ? "bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400"
-                          : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                        ? "bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400"
+                        : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                         }`}
                     >
                       <Home className="h-4 w-4" />
                       <span>Home</span>
                     </Link>
 
-<Collapsible>
-  <CollapsibleTrigger asChild>
-    <button
-      className="flex items-center justify-between w-full p-3 rounded-lg transition-colors text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
-    >
-      <span className="flex items-center space-x-2">
-        <Gamepad2 className="h-4 w-4" />
-        <span>Tournaments</span>
-      </span>
-      <ChevronDown className="h-4 w-4 transition-transform group-data-[state=open]:rotate-180" />
-    </button>
-  </CollapsibleTrigger>
-  
-  <CollapsibleContent className="space-y-2 mt-2 pl-6">
-    {tournamentCategories.map((category) => (
-      <Link
-        key={category.name}
-        href={category.href}
-        onClick={closeMobileMenu}
-        className={`flex items-center space-x-2 py-2 px-3 rounded-lg transition-colors ${
-          pathname === category.href
-            ? "bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400"
-            : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
-        }`}
-      >
-        {category.icon}
-        <span>{category.name}</span>
-      </Link>
-    ))}
-  </CollapsibleContent>
-</Collapsible>
+                    <Collapsible>
+                      <CollapsibleTrigger asChild>
+                        <button
+                          className="flex items-center justify-between w-full p-3 rounded-lg transition-colors text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                        >
+                          <span className="flex items-center space-x-2">
+                            <Gamepad2 className="h-4 w-4" />
+                            <span>Tournaments</span>
+                          </span>
+                          <ChevronDown className="h-4 w-4 transition-transform group-data-[state=open]:rotate-180" />
+                        </button>
+                      </CollapsibleTrigger>
+
+                      <CollapsibleContent className="space-y-2 mt-2 pl-6">
+                        {tournamentCategories.map((category) => (
+                          <Link
+                            key={category.name}
+                            href={category.href}
+                            onClick={closeMobileMenu}
+                            className={`flex items-center space-x-2 py-2 px-3 rounded-lg transition-colors ${pathname === category.href
+                                ? "bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400"
+                                : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                              }`}
+                          >
+                            {category.icon}
+                            <span>{category.name}</span>
+                          </Link>
+                        ))}
+                      </CollapsibleContent>
+                    </Collapsible>
                     <Link
                       href="/contact"
                       onClick={closeMobileMenu}
                       className={`flex items-center space-x-2 p-3 rounded-lg transition-colors ${pathname === "/contact"
-                          ? "bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400"
-                          : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                        ? "bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400"
+                        : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                         }`}
                     >
                       <Users2 className="h-4 w-4" />
@@ -342,7 +341,7 @@ export default function Header() {
                           Add Money
                         </Link>
                         <Link
-                          href="/joined-tournament"
+                          href="/joined-tournaments"
                           onClick={closeMobileMenu}
                           className="block p-3 rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/50 dark:to-purple-950/50 border border-blue-100 dark:border-blue-900 hover:from-blue-100 hover:to-purple-100 dark:hover:from-blue-900/50 dark:hover:to-purple-900/50 transition-colors font-medium"
                         >

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,7 +20,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'react-toastify';
 import { auth } from '@/config/firebase';
-import { fetchSignInMethodsForEmail } from 'firebase/auth';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { fetchSignInMethodsForEmail, getRedirectResult } from 'firebase/auth';
 
 // Email validation: starts with a letter, min 3 characters
 const emailValidation = z.string()
@@ -35,15 +36,42 @@ const formSchema = z.object({
 });
 
 type FormValues = z.infer<typeof formSchema>;
+
 function Login() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const isMobile = useIsMobile();
 
   const { register, handleSubmit, setError, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: { email: '', password: '' },
   });
+
+  // ✅ Handle Google redirect result (for mobile)
+  useEffect(() => {
+    const handleRedirect = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result) {
+          const axios = (await import('axios')).default;
+          const idToken = await result.user.getIdToken();
+
+          await axios.post('/api/user/sync-profile', {}, {
+            headers: { Authorization: `Bearer ${idToken}` },
+          });
+
+          toast.success('Google login successful');
+          router.push('/');
+        }
+      } catch (error: unknown) {
+        const firebaseError = error as { message?: string };
+        toast.error(firebaseError?.message || 'Google login failed');
+      }
+    };
+
+    handleRedirect();
+  }, [router]);
 
   // Check if email is already registered with Google
   const checkGoogleEmail = async (email: string) => {
@@ -96,7 +124,7 @@ function Login() {
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     try {
-      const { signInWithPopup } = await import('firebase/auth');
+      const { signInWithPopup, signInWithRedirect } = await import('firebase/auth');
       const { provider } = await import('@/config/firebase');
       const axios = (await import('axios')).default;
 
@@ -106,15 +134,19 @@ function Login() {
         return;
       }
 
-      const result = await signInWithPopup(auth, provider);
-      const idToken = await result.user.getIdToken();
+      if (isMobile) {
+        await signInWithRedirect(auth, provider); // ✅ Mobile flow
+      } else {
+        const result = await signInWithPopup(auth, provider); // ✅ Desktop flow
+        const idToken = await result.user.getIdToken();
 
-      await axios.post('/api/user/sync-profile', {}, {
-        headers: { Authorization: `Bearer ${idToken}` },
-      });
+        await axios.post('/api/user/sync-profile', {}, {
+          headers: { Authorization: `Bearer ${idToken}` },
+        });
 
-      toast.success('Google login successful');
-      router.push('/');
+        toast.success('Google login successful');
+        router.push('/');
+      }
     } catch (error: unknown) {
       const firebaseError = error as { message?: string };
       toast.error(firebaseError?.message || 'Google login failed');
@@ -205,13 +237,13 @@ function Login() {
 
         <CardFooter className="flex justify-center pt-3 border-t border-border">
           <p className="text-xs text-muted-foreground">
-            Don't have an account?{' '}
-            <Link href="/signup" className="text-primary hover:underline font-medium">
-              Sign up
-            </Link>
+            Don&apos;t have an account?{' '}
+            <Link href="/signup" className="underline hover:text-primary">Sign up</Link>
           </p>
         </CardFooter>
       </Card>
     </div>
   );
 }
+
+export default Login;

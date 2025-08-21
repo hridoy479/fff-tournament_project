@@ -28,6 +28,40 @@ interface Tournament {
   description?: string;
 }
 
+// Custom Countdown Renderer Component
+const CountdownRenderer = ({ days, hours, minutes, seconds, completed }: any) => {
+  if (completed) {
+    return <span className="text-red-500 font-semibold">Started</span>;
+  }
+
+  const TimeBlock = ({ value, label }: { value: number; label: string }) => (
+    <div className="flex flex-col items-center">
+      <div className="bg-gray-800 dark:bg-gray-700 text-white rounded-lg p-2 min-w-[50px] text-center relative overflow-hidden">
+        <div className="text-xl font-bold font-mono">{value.toString().padStart(2, '0')}</div>
+        {/* Shine effect */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-shine" />
+      </div>
+      <span className="text-xs text-gray-500 mt-1">{label}</span>
+    </div>
+  );
+
+  return (
+    <div className="flex items-center space-x-2">
+      {days > 0 && (
+        <>
+          <TimeBlock value={days} label="Days" />
+          <span className="text-gray-400">:</span>
+        </>
+      )}
+      <TimeBlock value={hours} label="Hours" />
+      <span className="text-gray-400">:</span>
+      <TimeBlock value={minutes} label="Minutes" />
+      <span className="text-gray-400">:</span>
+      <TimeBlock value={seconds} label="Seconds" />
+    </div>
+  );
+};
+
 const TournamentDetails = () => {
   const { id } = useParams();
   const [tournament, setTournament] = useState<Tournament | null>(null);
@@ -146,15 +180,7 @@ const TournamentDetails = () => {
               <Clock className="w-5 h-5 text-indigo-500" />
               <Countdown
                 date={dateObj}
-                renderer={({ hours, minutes, seconds, completed }) =>
-                  completed ? (
-                    <span className="text-red-500 font-semibold">Started</span>
-                  ) : (
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Starts in {hours}h {minutes}m {seconds}s
-                    </span>
-                  )
-                }
+                renderer={CountdownRenderer}
               />
             </div>
           </div>
@@ -218,6 +244,18 @@ const TournamentDetails = () => {
           </div>
         </div>
       </div>
+
+      {/* Add shine animation to CSS */}
+      <style jsx>{`
+        @keyframes shine {
+          to {
+            transform: translateX(100%);
+          }
+        }
+        .animate-shine {
+          animation: shine 2s infinite;
+        }
+      `}</style>
     </div>
   );
 };
