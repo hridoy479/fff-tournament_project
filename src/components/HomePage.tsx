@@ -1,4 +1,5 @@
 "use client";
+import { useEffect, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -10,10 +11,41 @@ import { motion } from "framer-motion";
 import RulesComponents from "./RulesComponents";
 import BeforeFooter from "./BeforeFooter";
 
- function HomePage() {
+interface IAlert {
+  _id: string;
+  message: string;
+  isActive: boolean;
+}
+
+function HomePage() {
+  const [alerts, setAlerts] = useState<IAlert[]>([]);
+
+  useEffect(() => {
+    const fetchAlerts = async () => {
+      try {
+        const res = await fetch("/api/alerts");
+        if (res.ok) {
+          const data = await res.json();
+          setAlerts(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch alerts", error);
+      }
+    };
+
+    fetchAlerts();
+  }, []);
+
   return (
     <main className="flex flex-col min-h-screen bg-background text-foreground mt-28">
-      
+      <div className="w-full max-w-7xl mx-auto px-4">
+        {alerts.map((alert) => (
+          <Alert key={alert._id} className="mb-4">
+            <AlertTitle>Notification</AlertTitle>
+            <AlertDescription>{alert.message}</AlertDescription>
+          </Alert>
+        ))}
+      </div>
 
       {/* Slider Section */}
       <motion.section
