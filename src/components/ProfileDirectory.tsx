@@ -64,13 +64,7 @@ const ProfileDirectory = () => {
     return () => unsubscribe();
   }, [router]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Loading profile...</p> {/* Replace with a proper skeleton loader */}
-      </div>
-    );
-  }
+ 
 
   if (!user) return null; // Should be handled by loading state and redirect
 

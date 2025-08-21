@@ -34,14 +34,7 @@ export default function DashboardSidebar() {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href="/dashboard/joined-tournaments" className="flex items-center gap-2">
-                    <ListChecks />
-                    <span>Joined Tournaments</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+ 
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
                   <Link href="/dashboard/tournaments" className="flex items-center gap-2">

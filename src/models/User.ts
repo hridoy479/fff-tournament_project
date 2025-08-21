@@ -2,7 +2,7 @@ import mongoose, { Schema, model, models, Document } from 'mongoose';
 
 // Define the interface for a User document
 export interface IUser extends Document {
-  uid: string; // Firebase User ID (UID) - unique identifier from Firebase Authentication
+  uid: string; 
   email?: string; // User's email, optional as some Firebase auth methods might not provide it
   accountBalance: number; // Balance available for general use (e.g., deposits, withdrawals)
   gameBalance: number; // Balance specifically for in-game activities or tournament entries

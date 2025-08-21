@@ -3,51 +3,75 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { FirebaseError } from 'firebase/app';
-import { auth, db } from '@/config/firebase'; // Ensure db is exported from your firebase config
-import { doc, setDoc } from 'firebase/firestore';
-
 import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
+  CardDescription,
   CardFooter,
   CardHeader,
-  CardDescription,
+  CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { toast } from 'react-toastify';
+import { Eye, EyeOff, Mail, Lock, User, Loader2 } from 'lucide-react';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+// Define the form schema with Zo
+// Define the form schema with Zod
+const formSchema = z.object({
+  email: z.string()
+    .email('Please enter a valid email address')
+    .refine((val) => {
+      const localPart = val.split('@')[0];
+      // at least 4 chars, must start with a letter
+      return /^[A-Za-z][A-Za-z0-9._%+-]{2,}$/.test(localPart);
+    }, {
+      message: "Invalid email username (must start with a letter and be at least 3 characters before @)",
+    }),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
+
+type FormValues = z.infer<typeof formSchema>;
 
 export default function Signup() {
   const router = useRouter();
-
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setError,
+  } = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
+  });
 
-    if (password !== confirmPassword) {
-      toast.error('Passwords do not match');
-      return;
-    }
-
-    if (password.length < 6) {
-      toast.error('Password must be at least 6 characters');
-      return;
-    }
-
+  const onSubmit = async (data: FormValues) => {
     setLoading(true);
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email.trim(), password);
+      // Dynamic imports for Firebase
+      const { createUserWithEmailAndPassword } = await import('firebase/auth');
+      const { doc, setDoc } = await import('firebase/firestore');
+      const { auth, db } = await import('@/config/firebase');
+      const axios = (await import('axios')).default;
+
+      const userCredential = await createUserWithEmailAndPassword(auth, data.email.trim(), data.password);
       const user = userCredential.user;
 
       // Create Firestore user doc with initial balances
@@ -66,11 +90,16 @@ export default function Signup() {
         },
       });
 
+      const { toast } = await import('react-toastify');
       toast.success('Signup successful! Redirecting...');
       router.push('/tournaments');
     } catch (error) {
+      const { toast } = await import('react-toastify');
+      const { FirebaseError } = await import('firebase/app');
+      
       if (error instanceof FirebaseError) {
         if (error.code === 'auth/email-already-in-use') {
+          setError('email', { message: 'Email already in use' });
           toast.info('User already exists. Redirecting to login...');
           setTimeout(() => {
             router.push('/login');
@@ -87,146 +116,139 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-black to-pink-900 p-6 mt-16">
-      <Card className="w-full max-w-md shadow-lg border border-pink-500">
-        <CardHeader className="text-center">
-          <motion.h1
-            className="text-4xl font-extrabold bg-gradient-to-r from-pink-500 via-white to-purple-500 bg-clip-text text-transparent animate-pulse"
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.6 }}
-          >
-            Create Your Account
-          </motion.h1>
-          <CardDescription className="mt-2 text-white/80">
-            Sign up with your email and password
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-sm shadow-lg border-border">
+        <CardHeader className="space-y-1 pb-3">
+          <CardTitle className="text-xl text-center">Create Account</CardTitle>
+          <CardDescription className="text-center">
+            Sign up to get started
           </CardDescription>
         </CardHeader>
 
-        <CardContent>
-          <form onSubmit={handleSignup}>
-            <fieldset disabled={loading} className="space-y-6">
-              {/* Email */}
-              <div>
-                <Label htmlFor="email" className="text-white/90">
-                  Email
-                </Label>
+        <CardContent className="space-y-3">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+            <div className="space-y-1">
+              <Label htmlFor="email" className="sr-only">
+                Email
+              </Label>
+              <div className="relative">
+                <Mail className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="email"
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder="Email"
                   autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={loading}
+                  className="pl-9 h-9"
+                  {...register('email')}
                 />
               </div>
+              {errors.email && (
+                <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>
+              )}
+            </div>
 
-              {/* Password */}
+            <div className="space-y-1">
+              <Label htmlFor="password" className="sr-only">
+                Password
+              </Label>
               <div className="relative">
-                <Label htmlFor="password" className="text-white/90">
-                  Password
-                </Label>
+                <Lock className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="********"
+                  placeholder="Password"
                   autoComplete="new-password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pr-10"
+                  disabled={loading}
+                  className="pl-9 pr-9 h-9"
+                  {...register('password')}
                 />
                 <button
                   type="button"
-                  className="absolute right-3 top-1/2 pt-4 -translate-y-1/2 text-gray-400 hover:text-pink-500"
+                  className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
                   onClick={() => setShowPassword((prev) => !prev)}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  disabled={loading}
                 >
-                  {showPassword ? <EyeOpenIcon /> : <EyeClosedIcon />}
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </button>
               </div>
+              {errors.password && (
+                <p className="text-xs text-red-500 mt-1">{errors.password.message}</p>
+              )}
+            </div>
 
-              {/* Confirm Password */}
+            <div className="space-y-1">
+              <Label htmlFor="confirm-password" className="sr-only">
+                Confirm Password
+              </Label>
               <div className="relative">
-                <Label htmlFor="confirm-password" className="text-white/90">
-                  Confirm Password
-                </Label>
+                <Lock className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="confirm-password"
                   type={showConfirmPassword ? 'text' : 'password'}
-                  placeholder="********"
+                  placeholder="Confirm Password"
                   autoComplete="new-password"
-                  required
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="pr-10"
+                  disabled={loading}
+                  className="pl-9 pr-9 h-9"
+                  {...register('confirmPassword')}
                 />
                 <button
                   type="button"
-                  className="absolute right-3 top-1/2 pt-4 -translate-y-1/2 text-gray-400 hover:text-pink-500"
+                  className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
                   onClick={() => setShowConfirmPassword((prev) => !prev)}
                   aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                  disabled={loading}
                 >
-                  {showConfirmPassword ? <EyeOpenIcon /> : <EyeClosedIcon />}
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </button>
               </div>
+              {errors.confirmPassword && (
+                <p className="text-xs text-red-500 mt-1">{errors.confirmPassword.message}</p>
+              )}
+            </div>
 
-              <Button type="submit" className="w-full">
-                {loading ? 'Signing up...' : 'Sign Up'}
-              </Button>
-            </fieldset>
+            <Button 
+              type="submit" 
+              className="w-full h-9"
+              disabled={loading}
+            >
+              {loading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                'Sign Up'
+              )}
+            </Button>
           </form>
+          
+          <div className="relative my-3">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-border"></div>
+            </div>
+            <div className="relative flex justify-center text-xs">
+              <span className="bg-background px-2 text-muted-foreground">Already have an account?</span>
+            </div>
+          </div>
+          
+          <Button 
+            asChild
+            variant="outline" 
+            className="w-full h-9"
+          >
+            <Link href="/login">
+              Log In
+            </Link>
+          </Button>
         </CardContent>
-
-        <CardFooter className="text-center text-white/70">
-          Already have an account?{' '}
-          <Link href="/login" className="underline hover:text-pink-400 ml-1">
-            Log In
-          </Link>
-        </CardFooter>
       </Card>
     </div>
-  );
-}
-
-// Eye open icon
-function EyeOpenIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      className="h-5 w-5"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-      />
-    </svg>
-  );
-}
-
-// Eye closed icon
-function EyeClosedIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      className="h-5 w-5"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.956 9.956 0 012.293-3.95m1.414-1.414A9.956 9.956 0 0112 5c4.478 0 8.268 2.943 9.542 7a9.956 9.956 0 01-4.043 5.197M15 12a3 3 0 11-6 0 3 3 0 016 0zm-7.071 7.071l12-12"
-      />
-    </svg>
   );
 }
