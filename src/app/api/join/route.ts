@@ -1,7 +1,4 @@
 export const runtime = 'nodejs';
-import { NextRequest, NextResponse } from 'next/server';
-import { supabaseServer } from '@/config/supabaseServer';
-import { admin } from '@/config/firebaseAdmin';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateToken } from '@/lib/authMiddleware';
