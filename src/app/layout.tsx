@@ -8,6 +8,7 @@ import { AlertDemo } from "@/components/AlertDemo";
 import Footer from "@/components/Footer";
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Toaster } from "react-hot-toast";
+import MobileNavigation from "@/components/MobileNavigation";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,6 +44,7 @@ export default function RootLayout({
             <Header />
          
             {children}
+            <MobileNavigation />
             <Footer />
             <Toaster position="top-right" />
             
