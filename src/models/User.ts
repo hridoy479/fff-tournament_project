@@ -3,7 +3,9 @@ import mongoose, { Schema, model, models, Document } from 'mongoose';
 // Define the interface for a User document
 export interface IUser extends Document {
   uid: string; 
+  username: string;
   email?: string; // User's email, optional as some Firebase auth methods might not provide it
+  emailVerified: boolean;
   accountBalance: number; // Balance available for general use (e.g., deposits, withdrawals)
   gameBalance: number; // Balance specifically for in-game activities or tournament entries
   createdAt?: Date; // Timestamp when the user record was created
@@ -18,10 +20,20 @@ const UserSchema = new Schema<IUser>({
     unique: true, // Ensures each Firebase UID is associated with only one user document
     index: true,   // Creates an index for faster lookups by UID
   },
+  username: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+  },
   email: {
     type: String,
     // Optional: You might want to add unique: true here if you want to ensure unique emails across your app,
     // but Firebase already handles email uniqueness for its auth methods.
+  },
+  emailVerified: {
+    type: Boolean,
+    default: false,
   },
   accountBalance: {
     type: Number,

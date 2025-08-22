@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
   try {
     await connectMongo();
     const body = await req.json();
-    const { title, date, image, entryFee, prize, joinedPlayers, maxPlayers, category, description, status, userId } = body;
+    const { title, date, image, entryFee, prize, joinedPlayers, maxPlayers, category, ffGameType, description, status, userId } = body;
 
     // Ensure numeric fields are actual numbers
     const parsedEntryFee = Number(entryFee);
@@ -59,6 +59,7 @@ export async function POST(req: NextRequest) {
       joined_players: parsedJoinedPlayers,
       max_players: parsedMaxPlayers,
       category,
+      ffGameType,
       description,
       status,
       userId,

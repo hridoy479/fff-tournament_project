@@ -19,6 +19,7 @@ interface IAlert {
 
 function HomePage() {
   const [alerts, setAlerts] = useState<IAlert[]>([]);
+  const [dismissedAlerts, setDismissedAlerts] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchAlerts = async () => {
@@ -36,15 +37,34 @@ function HomePage() {
     fetchAlerts();
   }, []);
 
+  const handleDismiss = (alertId: string) => {
+    setDismissedAlerts((prev) => [...prev, alertId]);
+  };
+
   return (
     <main className="flex flex-col min-h-screen bg-background text-foreground mt-28">
-      <div className="w-full max-w-7xl mx-auto px-4">
-        {alerts.map((alert) => (
-          <Alert key={alert._id} className="mb-4">
-            <AlertTitle>Notification</AlertTitle>
-            <AlertDescription>{alert.message}</AlertDescription>
-          </Alert>
-        ))}
+      <div className="w-full">
+        {alerts
+          .filter((alert) => !dismissedAlerts.includes(alert._id))
+          .map((alert) => (
+            <Alert
+              key={alert._id}
+              className="mb-4 bg-blue-500 text-white rounded-none relative"
+            >
+              <AlertTitle className="text-center font-bold">
+                Notification
+              </AlertTitle>
+              <AlertDescription className="text-center">
+                {alert.message}
+              </AlertDescription>
+              <button
+                onClick={() => handleDismiss(alert._id)}
+                className="absolute top-2 right-2 text-white"
+              >
+                &times;
+              </button>
+            </Alert>
+          ))}
       </div>
 
       {/* Slider Section */}

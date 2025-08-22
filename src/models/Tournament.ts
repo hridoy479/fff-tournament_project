@@ -13,6 +13,7 @@ export interface ITournament extends Document {
   joined_players: number;
   max_players?: number;
   category: string;
+  ffGameType?: string;
   description?: string;
   userId: string;
   createdAt?: Date;
@@ -56,6 +57,10 @@ const TournamentSchema = new Schema<ITournament>(
     category: {
       type: String,
       required: true,
+      trim: true,
+    },
+    ffGameType: {
+      type: String,
       trim: true,
     },
     description: {

@@ -13,10 +13,15 @@ interface IAlert {
   isActive: boolean;
 }
 
+import { Loader2 } from "lucide-react";
+
 const AlertManagement = () => {
   const { user } = useAuth();
   const [alerts, setAlerts] = useState<IAlert[]>([]);
   const [newMessage, setNewMessage] = useState("");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isAdding, setIsAdding] = useState(false);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const getHeaders = async () => {
     if (!user) return { "Content-Type": "application/json" };
@@ -51,7 +56,7 @@ const AlertManagement = () => {
   const handleAddAlert = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim() || !user) return;
-
+    setIsAdding(true);
     try {
       const headers = await getHeaders();
       const res = await fetch("/api/admin/alerts", {
@@ -66,11 +71,14 @@ const AlertManagement = () => {
       }
     } catch (error) {
       console.error("Failed to add alert", error);
+    } finally {
+      setIsAdding(false);
     }
   };
 
   const handleToggleAlert = async (id: string, isActive: boolean) => {
     if (!user) return;
+    setTogglingId(id);
     try {
       const headers = await getHeaders();
       const res = await fetch(`/api/admin/alerts/${id}`, {
@@ -84,6 +92,28 @@ const AlertManagement = () => {
       }
     } catch (error) {
       console.error("Failed to toggle alert", error);
+    } finally {
+      setTogglingId(null);
+    }
+  };
+
+  const handleDeleteAlert = async (id: string) => {
+    if (!user) return;
+    setDeletingId(id);
+    try {
+      const headers = await getHeaders();
+      const res = await fetch(`/api/admin/alerts/${id}`, {
+        method: "DELETE",
+        headers,
+      });
+
+      if (res.ok) {
+        setAlerts((prevAlerts) => prevAlerts.filter((alert) => alert._id !== id));
+      }
+    } catch (error) {
+      console.error("Failed to delete alert", error);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -99,17 +129,38 @@ const AlertManagement = () => {
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder="New alert message"
           />
-          <Button type="submit">Add Alert</Button>
+          <Button type="submit" disabled={isAdding}>
+            {isAdding ? <Loader2 className="h-4 w-4 animate-spin" /> : "Add Alert"}
+          </Button>
         </form>
 
         <div className="space-y-2">
           {alerts.map((alert) => (
             <div key={alert._id} className="flex items-center justify-between p-2 border rounded-md">
               <p>{alert.message}</p>
-              <Switch
-                checked={alert.isActive}
-                onCheckedChange={() => handleToggleAlert(alert._id, alert.isActive)}
-              />
+              <div className="flex items-center gap-2">
+                {togglingId === alert._id ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Switch
+                    checked={alert.isActive}
+                    onCheckedChange={() => handleToggleAlert(alert._id, alert.isActive)}
+                    disabled={togglingId === alert._id}
+                  />
+                )}
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => handleDeleteAlert(alert._id)}
+                  disabled={deletingId === alert._id}
+                >
+                  {deletingId === alert._id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    "Delete"
+                  )}
+                </Button>
+              </div>
             </div>
           ))}
         </div>

@@ -22,6 +22,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 // Define the form schema with Zo
 // Define the form schema with Zod
 const formSchema = z.object({
+  username: z.string().min(3, 'Username must be at least 3 characters').max(20, 'Username must be at most 20 characters'),
   email: z.string()
     .email('Please enter a valid email address')
     .refine((val) => {
@@ -66,38 +67,36 @@ export default function Signup() {
 
     try {
       // Dynamic imports for Firebase
-      const { createUserWithEmailAndPassword } = await import('firebase/auth');
-      const { doc, setDoc } = await import('firebase/firestore');
-      const { auth, db } = await import('@/config/firebase');
+      const { createUserWithEmailAndPassword, sendEmailVerification } = await import('firebase/auth');
+      const { auth } = await import('@/config/firebase');
       const axios = (await import('axios')).default;
 
+      // 1. Create user in Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(auth, data.email.trim(), data.password);
       const user = userCredential.user;
 
-      // Create Firestore user doc with initial balances
-      await setDoc(doc(db, 'users', user.uid), {
-        accountBalance: 0,
-        gameBalance: 0,
-        createdAt: new Date(),
+      // 2. Create user in MongoDB via your API
+      await axios.post('/api/user', {
+        uid: user.uid,
         email: user.email,
+        username: data.username,
       });
 
-      // Call backend to sync user profile to MongoDB
-      const idToken = await user.getIdToken();
-      await axios.post('/api/user/sync-profile', {}, {
-        headers: {
-          Authorization: `Bearer ${idToken}`,
-        },
-      });
+      // 3. Send verification email
+      await sendEmailVerification(user);
 
       const { toast } = await import('react-toastify');
-      toast.success('Signup successful! Redirecting...');
-      router.push('/tournaments');
+      toast.success('Signup successful! Please verify your email.');
+      router.push('/verify-email');
+
     } catch (error) {
       const { toast } = await import('react-toastify');
       const { FirebaseError } = await import('firebase/app');
       
-      if (error instanceof FirebaseError) {
+      if (error.response?.data?.error.includes('username')) {
+        setError('username', { message: 'Username already taken' });
+        toast.error('Username already taken');
+      } else if (error instanceof FirebaseError) {
         if (error.code === 'auth/email-already-in-use') {
           setError('email', { message: 'Email already in use' });
           toast.info('User already exists. Redirecting to login...');
@@ -127,6 +126,27 @@ export default function Signup() {
 
         <CardContent className="space-y-3">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+            <div className="space-y-1">
+              <Label htmlFor="username" className="sr-only">
+                Username
+              </Label>
+              <div className="relative">
+                <User className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder="Username"
+                  autoComplete="username"
+                  disabled={loading}
+                  className="pl-9 h-9"
+                  {...register('username')}
+                />
+              </div>
+              {errors.username && (
+                <p className="text-xs text-red-500 mt-1">{errors.username.message}</p>
+              )}
+            </div>
+
             <div className="space-y-1">
               <Label htmlFor="email" className="sr-only">
                 Email

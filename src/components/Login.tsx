@@ -95,7 +95,15 @@ function Login() {
       const axios = (await import('axios')).default;
 
       const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
-      const idToken = await userCredential.user.getIdToken();
+      const user = userCredential.user;
+
+      if (!user.emailVerified) {
+        toast.error('Please verify your email before logging in.');
+        router.push('/verify-email');
+        return;
+      }
+
+      const idToken = await user.getIdToken();
 
       await axios.post('/api/user/sync-profile', {}, {
         headers: { Authorization: `Bearer ${idToken}` },

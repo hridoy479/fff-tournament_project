@@ -34,3 +34,29 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     );
   }
 }
+
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const authResult = await authenticateAdmin(req);
+    if (authResult.error) {
+      return NextResponse.json({ error: authResult.error }, { status: authResult.status });
+    }
+
+    await connectMongo();
+    const { id } = params;
+
+    const deletedAlert = await AlertModel.findByIdAndDelete(id);
+
+    if (!deletedAlert) {
+      return NextResponse.json({ success: false, message: "Alert not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, message: "Alert deleted" }, { status: 200 });
+  } catch (error) {
+    console.error(`[AdminAlertsDELETE] Error:`, error);
+    return NextResponse.json(
+      { message: `Internal server error while deleting alert` },
+      { status: 500 }
+    );
+  }
+}

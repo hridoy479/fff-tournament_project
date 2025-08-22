@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import Countdown from 'react-countdown';
 
 type Numeric = number | '';
 
@@ -27,6 +28,7 @@ const AddTournamentPage = () => {
   const [joinedPlayers, setJoinedPlayers] = useState<Numeric>('');
   const [maxPlayers, setMaxPlayers] = useState<Numeric>('');
   const [category, setCategory] = useState('');
+  const [ffGameType, setFfGameType] = useState('');
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState('upcoming');
   const [activeTab, setActiveTab] = useState('details');
@@ -85,6 +87,7 @@ const AddTournamentPage = () => {
         joinedPlayers: joinedPlayers === '' ? 0 : joinedPlayers,
         maxPlayers: maxPlayers === '' ? 0 : maxPlayers,
         category,
+        ffGameType: category === 'freefire' ? ffGameType : undefined,
         description,
         status,
         userId: user.uid,
@@ -200,6 +203,22 @@ const AddTournamentPage = () => {
                         </Select>
                       </div>
                     </div>
+
+                    {category === 'freefire' && (
+                      <div className="space-y-2">
+                        <Label htmlFor="ff-game-type">Free Fire Game Type</Label>
+                        <Select value={ffGameType} onValueChange={setFfGameType}>
+                          <SelectTrigger id="ff-game-type">
+                            <SelectValue placeholder="Select a game type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="CS">CS</SelectItem>
+                            <SelectItem value="BR">BR</SelectItem>
+                            <SelectItem value="Lonewolf">Lonewolf</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
 
                     <div className="space-y-4">
                       <div className="flex items-center space-x-2">
@@ -387,6 +406,36 @@ const AddTournamentPage = () => {
                       <span>{date ? new Date(date).toLocaleString() : 'Date not set'}</span>
                     </div>
                   </div>
+
+                  {date && (
+                    <div className="mb-4">
+                      <Countdown date={date} renderer={({ days, hours, minutes, seconds, completed }) => {
+                        if (completed) {
+                          return <div className="text-center text-red-500 font-bold">Tournament has started!</div>;
+                        }
+                        return (
+                          <div className="flex justify-center items-center space-x-2 text-center">
+                            <div className="p-2 bg-primary text-primary-foreground rounded-lg min-w-[40px]">
+                              <div className="text-lg font-bold">{days}</div>
+                              <div className="text-xs">Days</div>
+                            </div>
+                            <div className="p-2 bg-primary text-primary-foreground rounded-lg min-w-[40px]">
+                              <div className="text-lg font-bold">{hours}</div>
+                              <div className="text-xs">Hours</div>
+                            </div>
+                            <div className="p-2 bg-primary text-primary-foreground rounded-lg min-w-[40px]">
+                              <div className="text-lg font-bold">{minutes}</div>
+                              <div className="text-xs">Mins</div>
+                            </div>
+                            <div className="p-2 bg-primary text-primary-foreground rounded-lg min-w-[40px]">
+                              <div className="text-lg font-bold">{seconds}</div>
+                              <div className="text-xs">Secs</div>
+                            </div>
+                          </div>
+                        );
+                      }} />
+                    </div>
+                  )}
                   
                   <div className="rounded-lg bg-muted p-3 mb-4">
                     <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Prize Pool</div>
