@@ -25,7 +25,7 @@ const AlertManagement = () => {
 
   const getHeaders = async () => {
     if (!user) return { "Content-Type": "application/json" };
-    const token = await user.getIdToken();
+    const token = await user.firebaseUser.getIdToken();
     return {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,

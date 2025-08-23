@@ -1,10 +1,13 @@
-
 import { NextRequest, NextResponse } from 'next/server';
 import { admin } from '@/config/firebaseAdmin';
 import { connectMongo } from '@/config/mongodb';
 import { UserModel } from '@/models/User';
 
 export async function GET(req: NextRequest) {
+  if (!admin.apps.length) {
+    return NextResponse.json({ error: 'Firebase Admin SDK not initialized. Please check server logs.' }, { status: 503 });
+  }
+
   try {
     const idToken = req.headers.get('Authorization')?.split('Bearer ')[1];
     if (!idToken) {
@@ -29,6 +32,9 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error('User status check error:', error);
+    if (error.code === 'auth/id-token-expired') {
+      return NextResponse.json({ error: 'Token expired' }, { status: 401 });
+    }
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

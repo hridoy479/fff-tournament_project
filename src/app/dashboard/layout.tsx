@@ -1,5 +1,6 @@
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import DashboardSidebar from "@/components/DashboardSidebar"
+import { DashboardNav } from "@/components/DashboardNav"
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -10,7 +11,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <SidebarTrigger />
           <div className="text-sm text-muted-foreground">Admin Dashboard</div>
         </div>
-        <div className="p-4">{children}</div>
+        <DashboardNav />
+        <div className="p-4 mt-20 md:mt-5">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   )

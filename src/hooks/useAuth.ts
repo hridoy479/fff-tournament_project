@@ -3,7 +3,8 @@ import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/config/firebase";
 import axios from 'axios';
 
-interface CustomUser extends User {
+export interface CustomUser {
+  firebaseUser: User;
   username?: string;
   emailVerified?: boolean;
 }
@@ -23,13 +24,13 @@ export function useAuth() {
             },
           });
           if (response.data) {
-            setUser({ ...firebaseUser, ...response.data });
+            setUser({ firebaseUser, ...response.data });
           } else {
-            setUser(firebaseUser);
+            setUser({ firebaseUser });
           }
         } catch (error) {
           console.error("Failed to fetch user data from backend:", error);
-          setUser(firebaseUser); // Fallback to just Firebase user if backend fetch fails
+          setUser({ firebaseUser }); // Fallback to just Firebase user if backend fetch fails
         }
       } else {
         setUser(null);
@@ -40,4 +41,4 @@ export function useAuth() {
   }, []);
 
   return { user, loading };
-} 
+}

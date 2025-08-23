@@ -17,7 +17,8 @@ import {
   ChevronDown,
   Crown,
   Dice5,
-  Smartphone
+  Smartphone,
+  LayoutDashboard
 } from "lucide-react";
 
 import { useAuth } from "@/hooks/useAuth";
@@ -44,6 +45,8 @@ export default function Header() {
     await signOut(auth);
     setIsUserSidebarOpen(false);
   };
+
+  const isAdmin = user?.firebaseUser?.email === "hridoymolla479@gmail.com";
 
   const tournamentCategories = [
     { name: "Free Fire", href: "/tournaments/category/freefire", icon: <Gamepad2 className="h-4 w-4" /> },
@@ -129,7 +132,18 @@ export default function Header() {
             <Gamepad2 className="h-4 w-4" />
             <span>My Mach</span>
           </Link>
-
+          {isAdmin && (
+            <Link
+              href="/dashboard"
+              className={`flex items-center space-x-1 font-medium px-3 py-2 rounded-md transition-colors ${pathname === "/dashboard"
+                ? "bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400"
+                : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                }`}
+            >
+              <LayoutDashboard className="h-4 w-4" />
+              <span>Dashboard</span>
+            </Link>
+          )}
         </nav>
 
         {/* Desktop Actions */}
@@ -150,9 +164,9 @@ export default function Header() {
                 className="h-9 w-9 cursor-pointer border-2 border-gray-200 dark:border-gray-800"
                 onClick={() => setIsUserSidebarOpen(true)}
               >
-                <AvatarImage src={user.photoURL || undefined} />
+                <AvatarImage src={user.firebaseUser.photoURL || undefined} />
                 <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
-                  {user.email?.[0]?.toUpperCase() || "U"}
+                  {user.firebaseUser.email?.[0]?.toUpperCase() || "U"}
                 </AvatarFallback>
               </Avatar>
 
@@ -162,14 +176,14 @@ export default function Header() {
                     <div className="p-6 border-b border-gray-200 dark:border-gray-800">
                       <div className="flex items-center space-x-3">
                         <Avatar className="h-12 w-12">
-                          <AvatarImage src={user.photoURL || undefined} />
+                          <AvatarImage src={user.firebaseUser.photoURL || undefined} />
                           <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
-                            {user.email?.[0]?.toUpperCase() || "U"}
+                            {user.firebaseUser.email?.[0]?.toUpperCase() || "U"}
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="font-medium">{user.displayName || "User"}</p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
+                          <p className="font-medium">{user.firebaseUser.displayName || "User"}</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{user.firebaseUser.email}</p>
                         </div>
                       </div>
                     </div>
@@ -190,16 +204,6 @@ export default function Header() {
                       >
                         <span className="font-medium">Add Money</span>
                       </Link>
-
-                      {user.email === "hridoymolla479@gmail.com" && (
-                        <Link
-                          href="/dashboard"
-                          onClick={closeUserSidebar}
-                          className="flex items-center p-3 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 transition-colors"
-                        >
-                          <span className="font-medium">Dashboard</span>
-                        </Link>
-                      )}
                     </div>
 
                     <div className="p-6 border-t border-gray-200 dark:border-gray-800">
@@ -299,6 +303,19 @@ export default function Header() {
                       <Users2 className="h-4 w-4" />
                       <span>Contact</span>
                     </Link>
+                    {isAdmin && (
+                      <Link
+                        href="/dashboard"
+                        onClick={closeMobileMenu}
+                        className={`flex items-center space-x-2 p-3 rounded-lg transition-colors ${pathname === "/dashboard"
+                          ? "bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400"
+                          : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                          }`}
+                      >
+                        <LayoutDashboard className="h-4 w-4" />
+                        <span>Dashboard</span>
+                      </Link>
+                    )}
                   </nav>
 
                   <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-800 space-y-4">
@@ -314,14 +331,14 @@ export default function Header() {
                       <>
                         <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <Avatar className="h-10 w-10">
-                            <AvatarImage src={user.photoURL || undefined} />
+                            <AvatarImage src={user.firebaseUser.photoURL || undefined} />
                             <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
-                              {user.email?.[0]?.toUpperCase() || "U"}
+                              {user.firebaseUser.email?.[0]?.toUpperCase() || "U"}
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">{user.displayName || "User"}</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
+                            <p className="text-sm font-medium truncate">{user.firebaseUser.displayName || "User"}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.firebaseUser.email}</p>
                           </div>
                         </div>
 
@@ -347,17 +364,6 @@ export default function Header() {
                         >
                           My Match
                         </Link>
-
-
-                        {user.email === "hridoymolla479@gmail.com" && (
-                          <Link
-                            href="/dashboard"
-                            onClick={closeMobileMenu}
-                            className="block p-3 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 transition-colors font-medium text-center"
-                          >
-                            Dashboard
-                          </Link>
-                        )}
 
                         <Button
                           variant="outline"

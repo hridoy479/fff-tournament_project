@@ -26,3 +26,30 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     );
   }
 }
+
+export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    await connectMongo();
+    const numericId = parseInt(params.id, 10);
+
+    if (isNaN(numericId)) {
+      return NextResponse.json({ message: 'Invalid tournament ID' }, { status: 400 });
+    }
+
+    const body = await req.json();
+
+    const updatedTournament = await TournamentModel.findOneAndUpdate({ id: numericId }, body, { new: true });
+
+    if (!updatedTournament) {
+      return NextResponse.json({ message: 'Tournament not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ tournament: updatedTournament }, { status: 200 });
+  } catch (error) {
+    console.error('[API/Tournaments/[id]] Error updating tournament:', error);
+    return NextResponse.json(
+      { message: 'Internal server error while updating tournament' },
+      { status: 500 }
+    );
+  }
+}
