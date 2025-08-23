@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Calendar, Clock, Users, Trophy, CreditCard, Sparkles, Zap, Crown } from "lucide-react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -68,7 +68,6 @@ const CountdownTimer: React.FC<{ targetDate: Date }> = ({ targetDate }) => {
 
     calculateTimeLeft();
     const timer = setInterval(calculateTimeLeft, 1000);
-
     return () => clearInterval(timer);
   }, [targetDate]);
 
@@ -81,7 +80,7 @@ const CountdownTimer: React.FC<{ targetDate: Date }> = ({ targetDate }) => {
   }
 
   return (
-    <div className="flex justify-center gap-2">
+    <div className="flex justify-center items-center gap-2">
       {timeLeft.days > 0 && (
         <div className="bg-white/10 rounded p-2 min-w-[50px] text-center">
           <div className="text-lg font-bold text-white">{timeLeft.days}</div>
@@ -104,10 +103,57 @@ const CountdownTimer: React.FC<{ targetDate: Date }> = ({ targetDate }) => {
   );
 };
 
+// Skeleton Loader Component
+const TournamentCardSkeleton: React.FC = () => {
+  return (
+    <Card className="max-w-md overflow-hidden rounded-2xl border-0 shadow-lg">
+      <div className="relative h-40 w-full bg-gradient-to-br from-gray-300 to-gray-200 dark:from-gray-700 dark:to-gray-600 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+        <div className="shimmer absolute inset-0" />
+      </div>
+      
+      <CardContent className="p-5 justify-center items-center">
+        <div className="flex justify-between mb-4">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-4 w-20" />
+        </div>
+        
+        <div className="mb-4 p-4 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 rounded-xl">
+          <Skeleton className="h-4 w-full mb-2" />
+          <div className="flex justify-center gap-2">
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-10 w-12 rounded" />
+            ))}
+          </div>
+        </div>
+        
+        <div className="mb-4 grid grid-cols-2 gap-3">
+          <Skeleton className="h-16 rounded-xl" />
+          <Skeleton className="h-16 rounded-xl" />
+        </div>
+        
+        <div className="space-y-3">
+          <div className="flex justify-between">
+            <Skeleton className="h-4 w-28" />
+            <Skeleton className="h-4 w-16" />
+          </div>
+          <Skeleton className="h-2 w-full rounded-full" />
+        </div>
+      </CardContent>
+      
+      <CardFooter className="px-5 pb-5 pt-2">
+        <Skeleton className="h-11 w-full rounded-xl" />
+      </CardFooter>
+    </Card>
+  );
+};
+
 const TournamentCardHome: React.FC = () => {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [loading, setLoading] = useState(true);
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+  const [loadingTournament, setLoadingTournament] = useState<Record<string, boolean>>({});
+  const router = useRouter();
 
   useEffect(() => {
     fetch("/api/tournaments")
@@ -125,33 +171,32 @@ const TournamentCardHome: React.FC = () => {
     setImageErrors(prev => ({ ...prev, [id]: true }));
   };
 
+  const handleButtonClick = async (tournament: Tournament) => {
+    if (tournament.status === "upcoming") {
+      setLoadingTournament(prev => ({ ...prev, [tournament.id]: true }));
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      router.push(`/tournaments/${tournament.id}`);
+      setLoadingTournament(prev => ({ ...prev, [tournament.id]: false }));
+    } else if (tournament.status === "running") {
+      router.push(`/tournaments/${tournament.id}/spectate`);
+    } else {
+      router.push(`/tournaments/${tournament.id}/results`);
+    }
+  };
+
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {Array.from({ length: 6 }).map((_, idx) => (
-          <Card key={idx} className="w-full overflow-hidden rounded-2xl border-0 shadow-lg">
-            <Skeleton className="h-40 w-full rounded-none" />
-            <CardContent className="p-5 space-y-4">
-              <Skeleton className="h-6 w-3/4" />
-              <div className="flex justify-between">
-                <Skeleton className="h-4 w-1/3" />
-                <Skeleton className="h-4 w-1/3" />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <Skeleton className="h-16 rounded-xl" />
-                <Skeleton className="h-16 rounded-xl" />
-              </div>
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-10 w-full rounded-xl" />
-            </CardContent>
-          </Card>
+          <TournamentCardSkeleton key={idx} />
         ))}
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 w-full  lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 w-full lg:grid-cols-3 gap-6">
       {tournaments.map((tournament) => {
         const tournamentDate = new Date(tournament.date);
         const formattedDate = format(tournamentDate, "MMM dd, yyyy");
@@ -161,8 +206,10 @@ const TournamentCardHome: React.FC = () => {
           100
         );
 
+        const isLoading = loadingTournament[tournament.id] || false;
+
         return (
-          <Card key={tournament.id}  className="max-w-md overflow-hidden rounded-2xl border-0 shadow-lg transition-all duration-300 hover:shadow-xl ">
+          <Card key={tournament.id} className="max-w-md overflow-hidden rounded-2xl border-0 shadow-lg transition-all duration-300 hover:shadow-xl">
             <div className="relative h-40 w-full">
               {tournament.image && !imageErrors[tournament.id] ? (
                 <Image
@@ -244,12 +291,23 @@ const TournamentCardHome: React.FC = () => {
 
             <CardFooter className="px-5 pb-5 pt-2">
               <Button 
-                className="w-full text-sm h-11 rounded-xl font-bold transition-all duration-300" 
+                className="w-full text-sm h-11 rounded-xl font-bold transition-all duration-300 flex justify-center items-center gap-2" 
                 variant={tournament.status === "upcoming" ? "default" : tournament.status === "running" ? "secondary" : "outline"}
                 size="lg"
+                onClick={() => handleButtonClick(tournament)}
+                disabled={isLoading}
               >
-                {tournament.status === "upcoming" ? "Join Tournament" : tournament.status === "running" ? "Spectate Now" : "View Results"}
-                {tournament.status === "upcoming" && <Sparkles className="ml-2 h-4 w-4" />}
+                {isLoading ? (
+                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8z"></path>
+                  </svg>
+                ) : (
+                  <>
+                    {tournament.status === "upcoming" ? "Join Tournament" : tournament.status === "running" ? "Spectate Now" : "View Results"}
+                    {tournament.status === "upcoming" && <Sparkles className="ml-2 h-4 w-4" />}
+                  </>
+                )}
               </Button>
             </CardFooter>
           </Card>

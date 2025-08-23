@@ -114,7 +114,7 @@ const TournamentCard: React.FC<TournamentCardProps> = ({ selectedGame }) => {
     return (
       <div
         className="p-4 rounded-2xl shadow-lg w-full max-w-sm hover:scale-105 transition cursor-pointer mx-auto mb-6 bg-white dark:bg-zinc-800 hover:shadow-xl"
-        onClick={() => handleTournamentClick(tournament.id)}
+       
       >
         {tournament.image && (
           <img
