@@ -16,6 +16,7 @@ export interface ITournament extends Document {
   ffGameType?: string;
   description?: string;
   userId: string;
+  match_id?: string; // Added match_id
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -70,6 +71,10 @@ const TournamentSchema = new Schema<ITournament>(
     userId: {
       type: String,
       required: true,
+    },
+    match_id: {
+      type: String,
+      trim: true,
     },
   },
   { timestamps: true }

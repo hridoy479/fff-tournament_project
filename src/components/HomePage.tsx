@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { AutoCarousel } from "@/components/AutoCarousel";
@@ -15,11 +16,11 @@ interface IAlert {
   _id: string;
   message: string;
   isActive: boolean;
+  isOpen: boolean; // Added isOpen property
 }
 
 function HomePage() {
   const [alerts, setAlerts] = useState<IAlert[]>([]);
-  const [dismissedAlerts, setDismissedAlerts] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchAlerts = async () => {
@@ -27,7 +28,7 @@ function HomePage() {
         const res = await fetch("/api/alerts");
         if (res.ok) {
           const data = await res.json();
-          setAlerts(data);
+          setAlerts(data.map((alert: IAlert) => ({ ...alert, isOpen: true }))); // Initialize isOpen
         }
       } catch (error) {
         console.error("Failed to fetch alerts", error);
@@ -38,32 +39,32 @@ function HomePage() {
   }, []);
 
   const handleDismiss = (alertId: string) => {
-    setDismissedAlerts((prev) => [...prev, alertId]);
+    setAlerts((prevAlerts) =>
+      prevAlerts.map((alert) =>
+        alert._id === alertId ? { ...alert, isOpen: false } : alert
+      )
+    );
   };
 
   return (
     <main className="flex flex-col min-h-screen bg-background text-foreground mt-28">
       <div className="w-full">
         {alerts
-          .filter((alert) => !dismissedAlerts.includes(alert._id))
+          .filter((alert) => alert.isOpen) // Filter by isOpen
           .map((alert) => (
-            <Alert
-              key={alert._id}
-              className="mb-4 bg-blue-500 text-white rounded-none relative"
-            >
-              <AlertTitle className="text-center font-bold">
-                Notification
-              </AlertTitle>
-              <AlertDescription className="text-center">
-                {alert.message}
-              </AlertDescription>
-              <button
-                onClick={() => handleDismiss(alert._id)}
-                className="absolute top-2 right-2 text-white"
-              >
-                &times;
-              </button>
-            </Alert>
+            <AlertDialog open={alert.isOpen} onOpenChange={() => handleDismiss(alert._id)} key={alert._id}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="text-center font-bold">Notification</AlertDialogTitle>
+                  <AlertDialogDescription className="text-center">
+                    {alert.message}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogAction onClick={() => handleDismiss(alert._id)}>Dismiss</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           ))}
       </div>
 

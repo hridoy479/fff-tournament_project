@@ -82,10 +82,10 @@ const AddTournamentPage = () => {
         title,
         date,
         image: finalImageUrl,
-        entryFee: entryFee === '' ? 0 : entryFee,
+        entry_fee: entryFee === '' ? 0 : entryFee,
         prize,
-        joinedPlayers: joinedPlayers === '' ? 0 : joinedPlayers,
-        maxPlayers: maxPlayers === '' ? 0 : maxPlayers,
+        joined_players: joinedPlayers === '' ? 0 : joinedPlayers,
+        max_players: maxPlayers === '' ? 0 : maxPlayers,
         category,
         ffGameType: category === 'freefire' ? ffGameType : undefined,
         description,
@@ -107,10 +107,17 @@ const AddTournamentPage = () => {
     const formData = new FormData();
     formData.append('file', file);
 
+    const user = auth.currentUser;
+    if (!user) {
+      throw new Error('User not authenticated for image upload.');
+    }
+    const idToken = await user.getIdToken();
+
     try {
       const response = await axios.post('/api/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${idToken}`,
         },
       });
       if (response.data.success) {
@@ -197,8 +204,7 @@ const AddTournamentPage = () => {
                           <SelectContent>
                             <SelectItem value="freefire">Free Fire</SelectItem>
                             <SelectItem value="efootball">E FootBall</SelectItem>
-                            <SelectItem value="ludoking">Ludo</SelectItem>
-                            <SelectItem value="Other">Other</SelectItem>
+                            <SelectItem value="ludo">Ludo</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
