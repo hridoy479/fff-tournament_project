@@ -18,7 +18,8 @@ import {
   Crown,
   Dice5,
   Smartphone,
-  LayoutDashboard
+  LayoutDashboard,
+  DollarSign
 } from "lucide-react";
 
 import { useAuth } from "@/hooks/useAuth";
@@ -202,7 +203,16 @@ export default function Header() {
                         onClick={closeUserSidebar}
                         className="flex items-center p-3 rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/50 dark:to-purple-950/50 border border-blue-100 dark:border-blue-900 hover:from-blue-100 hover:to-purple-100 dark:hover:from-blue-900/50 dark:hover:to-purple-900/50 transition-colors"
                       >
+                        <DollarSign className="h-4 w-4 mr-2"/>
                         <span className="font-medium">Add Money</span>
+                      </Link>
+                      <Link
+                        href="/withdraw-money"
+                        onClick={closeUserSidebar}
+                        className="flex items-center p-3 rounded-lg bg-gradient-to-r from-green-50 to-teal-50 dark:from-green-950/50 dark:to-teal-950/50 border border-green-100 dark:border-green-900 hover:from-green-100 hover:to-teal-100 dark:hover:from-green-900/50 dark:hover:to-teal-900/50 transition-colors"
+                      >
+                        <DollarSign className="h-4 w-4 mr-2"/>
+                        <span className="font-medium">Withdraw Money</span>
                       </Link>
                     </div>
 
@@ -356,6 +366,13 @@ export default function Header() {
                           className="block p-3 rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/50 dark:to-purple-950/50 border border-blue-100 dark:border-blue-900 hover:from-blue-100 hover:to-purple-100 dark:hover:from-blue-900/50 dark:hover:to-purple-900/50 transition-colors font-medium"
                         >
                           Add Money
+                        </Link>
+                        <Link
+                          href="/withdraw-money"
+                          onClick={closeMobileMenu}
+                          className="block p-3 rounded-lg bg-gradient-to-r from-green-50 to-teal-50 dark:from-green-950/50 dark:to-teal-950/50 border border-green-100 dark:border-green-900 hover:from-green-100 hover:to-teal-100 dark:hover:from-green-900/50 dark:hover:to-teal-900/50 transition-colors font-medium"
+                        >
+                          Withdraw Money
                         </Link>
                         <Link
                           href="/joined-tournaments"

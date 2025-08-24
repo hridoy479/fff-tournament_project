@@ -3,7 +3,7 @@ import { TournamentModel } from '@/models/Tournament';
 import { connectMongo } from '@/config/mongodb';
 import { createTournament } from '@/services/tournamentService';
 import { authenticateAdmin } from '@/lib/auth';
-import { z } from 'zod'; // Keep z for ZodError instance check
+import { z } from 'zod';
 
 // Helper function to handle common error responses
 function handleError(error: any, context: string) {
@@ -22,16 +22,18 @@ function handleError(error: any, context: string) {
  * Fetches all tournaments. Requires admin access.
  */
 export async function GET(req: NextRequest) {
-  const handler = async (req: NextRequest) => {
-    try {
-      await connectMongo();
-      const tournaments = await TournamentModel.find({}).sort({ date: 1 }).lean();
-      return NextResponse.json({ tournaments }, { status: 200 });
-    } catch (error) {
-      return handleError(error, 'AdminTournamentsGET');
-    }
-  };
-  return authenticateAdmin(handler)(req, new NextResponse());
+  const authResult = await authenticateAdmin(req);
+  if (authResult.error) {
+    return NextResponse.json({ error: authResult.error }, { status: authResult.status });
+  }
+
+  try {
+    await connectMongo();
+    const tournaments = await TournamentModel.find({}).sort({ date: 1 }).lean();
+    return NextResponse.json({ tournaments }, { status: 200 });
+  } catch (error) {
+    return handleError(error, 'AdminTournamentsGET');
+  }
 }
 
 /**
@@ -39,15 +41,17 @@ export async function GET(req: NextRequest) {
  * Creates a new tournament. Requires admin access.
  */
 export async function POST(req: NextRequest) {
-  const handler = async (req: NextRequest) => {
-    try {
-      await connectMongo();
-      const body = await req.json();
-      const savedTournament = await createTournament(body);
-      return NextResponse.json({ success: true, data: savedTournament }, { status: 201 });
-    } catch (error) {
-      return handleError(error, 'AdminTournamentsPOST');
-    }
-  };
-  return authenticateAdmin(handler)(req, new NextResponse());
+  const authResult = await authenticateAdmin(req);
+  if (authResult.error) {
+    return NextResponse.json({ error: authResult.error }, { status: authResult.status });
+  }
+
+  try {
+    await connectMongo();
+    const body = await req.json();
+    const savedTournament = await createTournament(body);
+    return NextResponse.json({ success: true, data: savedTournament }, { status: 201 });
+  } catch (error) {
+    return handleError(error, 'AdminTournamentsPOST');
+  }
 }

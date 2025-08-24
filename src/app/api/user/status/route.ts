@@ -1,40 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { admin } from '@/config/firebaseAdmin';
+import { admin, initializeFirebaseAdmin } from '@/config/firebaseAdmin';
 import { connectMongo } from '@/config/mongodb';
 import { UserModel } from '@/models/User';
 
+async function getUserFromToken(req: NextRequest) {
+  const authHeader = req.headers.get('authorization');
+  if (!authHeader?.startsWith('Bearer ')) return null;
+  const idToken = authHeader.split(' ')[1];
+  try {
+    return await admin.auth().verifyIdToken(idToken);
+  } catch (error) {
+    console.error('Error verifying token in getUserFromToken:', error);
+    return null;
+  }
+}
+
 export async function GET(req: NextRequest) {
-  if (!admin.apps.length) {
-    return NextResponse.json({ error: 'Firebase Admin SDK not initialized. Please check server logs.' }, { status: 503 });
+  initializeFirebaseAdmin(); // Ensure Firebase Admin SDK is initialized
+  console.log('ADMIN_EMAIL:', process.env.ADMIN_EMAIL);
+  const decodedToken = await getUserFromToken(req);
+  if (!decodedToken) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
-    const idToken = req.headers.get('Authorization')?.split('Bearer ')[1];
-    if (!idToken) {
-      return NextResponse.json({ error: 'No token provided' }, { status: 401 });
-    }
-
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
-    const { uid } = decodedToken;
-
     await connectMongo();
-
-    const user = await UserModel.findOne({ uid });
-
+    const user = await UserModel.findOne({ uid: decodedToken.uid }).lean();
     if (!user) {
-      return NextResponse.json({ error: 'User not found in DB' }, { status: 404 });
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     return NextResponse.json({
-      uid: user.uid,
-      emailVerified: user.emailVerified,
       username: user.username,
+      emailVerified: decodedToken.email_verified,
+      isAdmin: user.email === process.env.ADMIN_EMAIL,
     });
   } catch (error) {
-    console.error('User status check error:', error);
-    if (error.code === 'auth/id-token-expired') {
-      return NextResponse.json({ error: 'Token expired' }, { status: 401 });
-    }
+    console.error('User status fetch error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

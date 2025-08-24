@@ -1,17 +1,20 @@
 import { useEffect, useState } from "react";
 import { onAuthStateChanged, User } from "firebase/auth";
-import { auth } from "@/config/firebase";
+import { auth } from "@/config/firebaseClient";
 import axios from 'axios';
+import { useRouter } from 'next/navigation';
 
 export interface CustomUser {
   firebaseUser: User;
   username?: string;
   emailVerified?: boolean;
+  isAdmin?: boolean;
 }
 
 export function useAuth() {
   const [user, setUser] = useState<CustomUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -23,14 +26,19 @@ export function useAuth() {
               Authorization: `Bearer ${idToken}`,
             },
           });
+
           if (response.data) {
-            setUser({ firebaseUser, ...response.data });
+            const userData = response.data;
+            setUser({ firebaseUser, ...userData });
+            if (!userData.emailVerified) {
+              router.push('/verify-email');
+            }
           } else {
             setUser({ firebaseUser });
           }
         } catch (error) {
           console.error("Failed to fetch user data from backend:", error);
-          setUser({ firebaseUser }); // Fallback to just Firebase user if backend fetch fails
+          setUser({ firebaseUser });
         }
       } else {
         setUser(null);
@@ -38,7 +46,7 @@ export function useAuth() {
       setLoading(false);
     });
     return () => unsubscribe();
-  }, []);
+  }, [router]);
 
   return { user, loading };
 }

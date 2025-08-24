@@ -16,7 +16,7 @@ interface IAlert {
 import { Loader2 } from "lucide-react";
 
 const AlertManagement = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [alerts, setAlerts] = useState<IAlert[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -33,13 +33,15 @@ const AlertManagement = () => {
   };
 
   const fetchAlerts = async () => {
-    if (!user) return;
+    if (!user || !user.isAdmin) return;
     try {
       const headers = await getHeaders();
       const res = await fetch("/api/admin/alerts", { headers });
       if (res.ok) {
         const data = await res.json();
         setAlerts(data);
+      } else if (res.status === 401) {
+        console.error("Unauthorized: You are not an admin.");
       }
     } catch (error) {
       console.error("Failed to fetch alerts", error);
@@ -47,7 +49,7 @@ const AlertManagement = () => {
   };
 
   useEffect(() => {
-    if (user) {
+    if (user && user.isAdmin) {
       fetchAlerts();
     }
   }, [user]);
@@ -116,6 +118,23 @@ const AlertManagement = () => {
       setDeletingId(null);
     }
   };
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+  if (!user || !user.isAdmin) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Alert Management</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>You are not authorized to view this page.</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>

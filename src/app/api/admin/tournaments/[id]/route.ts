@@ -1,68 +1,88 @@
-export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
-import { connectMongo } from '@/config/mongodb';
 import { TournamentModel } from '@/models/Tournament';
+import { connectMongo } from '@/config/mongodb';
 import { authenticateAdmin } from '@/lib/auth';
+import { z } from 'zod'; // Keep z for ZodError instance check
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+// Helper function to handle common error responses
+function handleError(error: any, context: string) {
+  console.error(`[${context}] Error:`, error);
+  if (error instanceof z.ZodError) {
+    return NextResponse.json({ success: false, message: 'Validation error', errors: error.errors }, { status: 400 });
+  }
+  return NextResponse.json(
+    { message: `Internal server error while ${context.toLowerCase()}` },
+    { status: 500 }
+  );
+}
+
+/**
+ * GET /api/admin/tournaments/:id
+ * Fetches a single tournament by its ID. Requires admin access.
+ */
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+  const authResult = await authenticateAdmin(req);
+  if (authResult.error) {
+    return NextResponse.json({ error: authResult.error }, { status: authResult.status });
+  }
+
   try {
-    const authResult = await authenticateAdmin(req);
-    if (authResult.error) {
-      return NextResponse.json({ error: authResult.error }, { status: authResult.status });
-    }
-
-    const numericId = parseInt(params.id, 10);
-    const payload = await req.json();
-    const update: any = {};
-
-    if (payload.title) {
-      update.title = payload.title;
-    }
-    if (payload.date) {
-      const date = new Date(payload.date);
-      if (isNaN(date.getTime())) {
-        return NextResponse.json({ error: 'Invalid date format' }, { status: 400 });
-      }
-      update.date = date;
-    }
-    if (typeof payload.entry_fee === 'number') {
-      if (payload.entry_fee < 0) {
-        return NextResponse.json({ error: 'Entry fee cannot be negative' }, { status: 400 });
-      }
-      update.entry_fee = payload.entry_fee;
-    }
-    if (payload.status) {
-      const allowedStatuses = ['upcoming', 'started', 'completed', 'cancelled'];
-      if (!allowedStatuses.includes(payload.status)) {
-        return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
-      }
-      update.status = payload.status;
-    }
-
     await connectMongo();
-    await TournamentModel.updateOne({ id: numericId }, { $set: update });
-    return NextResponse.json({ ok: true });
-  } catch (e) {
-    console.error("PATCH /api/admin/tournaments/[id] error:", e);
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    const tournament = await TournamentModel.findById(params.id).lean();
+    if (!tournament) {
+      return NextResponse.json({ success: false, message: 'Tournament not found' }, { status: 404 });
+    }
+    return NextResponse.json({ success: true, data: tournament }, { status: 200 });
+  } catch (error) {
+    return handleError(error, 'AdminTournamentGET');
   }
 }
 
+/**
+ * PUT /api/admin/tournaments/:id
+ * Updates a tournament. Requires admin access.
+ */
+export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+  const authResult = await authenticateAdmin(req);
+  if (authResult.error) {
+    return NextResponse.json({ error: authResult.error }, { status: authResult.status });
+  }
+
+  try {
+    await connectMongo();
+    const body = await req.json();
+    const updatedTournament = await TournamentModel.findByIdAndUpdate(
+      params.id,
+      body,
+      { new: true, runValidators: true }
+    );
+    if (!updatedTournament) {
+      return NextResponse.json({ success: false, message: 'Tournament not found' }, { status: 404 });
+    }
+    return NextResponse.json({ success: true, data: updatedTournament }, { status: 200 });
+  } catch (error) {
+    return handleError(error, 'AdminTournamentPUT');
+  }
+}
+
+/**
+ * DELETE /api/admin/tournaments/:id
+ * Deletes a tournament. Requires admin access.
+ */
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
-  try {
-    const authResult = await authenticateAdmin(req);
-    if (authResult.error) {
-      return NextResponse.json({ error: authResult.error }, { status: authResult.status });
-    }
+  const authResult = await authenticateAdmin(req);
+  if (authResult.error) {
+    return NextResponse.json({ error: authResult.error }, { status: authResult.status });
+  }
 
-    const numericId = parseInt(params.id, 10);
+  try {
     await connectMongo();
-    await TournamentModel.deleteOne({ id: numericId });
-    return NextResponse.json({ ok: true });
-  } catch (e) {
-    console.error("DELETE /api/admin/tournaments/[id] error:", e);
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    const deletedTournament = await TournamentModel.findByIdAndDelete(params.id);
+    if (!deletedTournament) {
+      return NextResponse.json({ success: false, message: 'Tournament not found' }, { status: 404 });
+    }
+    return NextResponse.json({ success: true, message: 'Tournament deleted' }, { status: 200 });
+  } catch (error) {
+    return handleError(error, 'AdminTournamentDELETE');
   }
 }
-
-

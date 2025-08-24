@@ -103,12 +103,10 @@ function HomePage() {
         transition={{ delay: 0.3, duration: 0.6 }}
         className="w-full mb-10 px-4"
       >
-        <div className="hidden md:block">
+        <div className="">
           <AutoCarousel />
         </div>
-        <div className="md:hidden">
-          <MobileCarousel />
-        </div>
+        
       </motion.section>
 
       {/* Tournaments Section */}

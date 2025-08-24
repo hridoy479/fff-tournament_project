@@ -2,6 +2,22 @@ import { NextResponse } from 'next/server';
 import { connectMongo } from '@/config/mongodb';
 import { TournamentModel } from '@/models/Tournament';
 import { NextRequest } from 'next/server';
+import { z } from 'zod';
+
+const tournamentSchema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  date: z.string().refine((date) => !isNaN(new Date(date).getTime()), 'Invalid date format'),
+  image: z.string().optional(),
+  entry_fee: z.number().min(0, 'Entry fee must be a positive number'),
+  prize: z.string().optional(),
+  joined_players: z.number().min(0, 'Joined players must be a positive number'),
+  max_players: z.number().min(1, 'Max players must be at least 1'),
+  category: z.enum(['freefire', 'ludo', 'E Football']),
+  ffGameType: z.string().optional(),
+  description: z.string().optional(),
+  status: z.enum(['upcoming', 'started', 'completed', 'cancelled']),
+  userId: z.string().min(1, 'User ID is required'),
+});
 
 export async function GET(req: NextRequest) {
   try {
@@ -15,7 +31,7 @@ export async function GET(req: NextRequest) {
       const normalizedCategory = decodeURIComponent(category)
         .replace(/-/g, ' ') // Replace hyphens with spaces
         .split(' ')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize each word
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
         .join(' ');
 
       query.category = { $regex: new RegExp(`^${normalizedCategory}$`, 'i') };
@@ -33,36 +49,27 @@ export async function POST(req: NextRequest) {
   try {
     await connectMongo();
     const body = await req.json();
-    const { title, date, image, entryFee, prize, joinedPlayers, maxPlayers, category, ffGameType, description, status, userId } = body;
+    const validation = tournamentSchema.safeParse(body);
 
-    // Ensure numeric fields are actual numbers
-    const parsedEntryFee = Number(entryFee);
-    const parsedJoinedPlayers = Number(joinedPlayers);
-    const parsedMaxPlayers = Number(maxPlayers);
-
-    // Parse date string to Date object
-    const parsedDate = date ? new Date(date) : undefined;
-
-    if (!title || !parsedDate || !parsedMaxPlayers || !userId) {
-      return NextResponse.json(
-        { message: "Missing required fields: title, date, maxPlayers, and userId are required." },
-        { status: 400 }
-      );
+    if (!validation.success) {
+      return NextResponse.json({ success: false, errors: validation.error.errors }, { status: 400 });
     }
 
+    const { data } = validation;
+
     const tournament = await TournamentModel.create({
-      title,
-      date: parsedDate, // Use the parsed Date object
-      image,
-      entry_fee: parsedEntryFee,
-      prize,
-      joined_players: parsedJoinedPlayers,
-      max_players: parsedMaxPlayers,
-      category,
-      ffGameType,
-      description,
-      status,
-      userId,
+      title: data.title,
+      date: new Date(data.date),
+      image: data.image,
+      entry_fee: data.entry_fee,
+      prize: data.prize,
+      joined_players: data.joined_players,
+      max_players: data.max_players,
+      category: data.category,
+      ffGameType: data.ffGameType,
+      description: data.description,
+      status: data.status,
+      userId: data.userId,
     });
 
     return NextResponse.json({ message: "Tournament created", tournament }, { status: 201 });

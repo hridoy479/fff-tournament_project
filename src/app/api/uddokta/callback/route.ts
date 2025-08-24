@@ -1,13 +1,12 @@
-
 import { NextRequest, NextResponse } from "next/server";
 import { UserModel } from "@/models/User";
-import { TransactionModel }d from "@/models/Transaction";
+import { TransactionModel } from "@/models/Transaction"; // Fixed typo
 import mongoose from "mongoose";
-import { connectToDB } from "@/config/mongodb";
+import { connectMongo } from "@/config/mongodb"; // Fixed typo
 
 export async function POST(req: NextRequest) {
   try {
-    await connectToDB();
+    await connectMongo(); // Fixed typo
     const body = await req.json();
 
     const { amount, status, transaction_id, metadata } = body;
@@ -52,7 +51,7 @@ export async function POST(req: NextRequest) {
           throw new Error("User not found");
         }
 
-        user.accountBalance += amount;
+        user.accountBalance += amount; // Changed from user.balance to user.accountBalance
         await user.save({ session });
       } else {
         const newTransaction = new TransactionModel({

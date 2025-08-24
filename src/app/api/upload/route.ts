@@ -20,39 +20,41 @@ export const config = {
 };
 
 export async function POST(req: NextRequest) {
-  const handler = async (req: NextRequest) => {
-    try {
-      const formData = await req.formData();
-      const file = formData.get('file') as Blob | null;
+  const authResult = await authenticateAdmin(req);
+  if (authResult.error) {
+    return NextResponse.json({ error: authResult.error }, { status: authResult.status });
+  }
 
-      if (!file) {
-        return NextResponse.json({ success: false, message: 'No file uploaded' }, { status: 400 });
-      }
+  try {
+    const formData = await req.formData();
+    const file = formData.get('file') as Blob | null;
 
-      const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-      if (!allowedMimeTypes.includes(file.type)) {
-        return NextResponse.json({ success: false, message: 'Invalid file type. Only images (JPEG, PNG, GIF, WEBP) are allowed.' }, { status: 400 });
-      }
-
-      const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-      if (file.size > MAX_FILE_SIZE) {
-        return NextResponse.json({ success: false, message: 'File size exceeds limit (5MB)' }, { status: 413 });
-      }
-
-      const buffer = Buffer.from(await file.arrayBuffer());
-      const ext = path.extname(file.name || '');
-      const newFilename = uuidv4() + ext;
-      const uploadDir = path.join(process.cwd(), 'public/uploads');
-      const newPath = path.join(uploadDir, newFilename);
-
-      await fs.mkdir(uploadDir, { recursive: true });
-      await fs.writeFile(newPath, buffer);
-
-      const fileUrl = `/uploads/${newFilename}`;
-      return NextResponse.json({ success: true, url: fileUrl });
-    } catch (e: any) {
-      return handleError(e, 'FileUploadPOST');
+    if (!file) {
+      return NextResponse.json({ success: false, message: 'No file uploaded' }, { status: 400 });
     }
-  };
-  return handler(req); // Temporarily remove authenticateAdmin for testing
+
+    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedMimeTypes.includes(file.type)) {
+      return NextResponse.json({ success: false, message: 'Invalid file type. Only images (JPEG, PNG, GIF, WEBP) are allowed.' }, { status: 400 });
+    }
+
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    if (file.size > MAX_FILE_SIZE) {
+      return NextResponse.json({ success: false, message: 'File size exceeds limit (5MB)' }, { status: 413 });
+    }
+
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const ext = path.extname(file.name || '');
+    const newFilename = uuidv4() + ext;
+    const uploadDir = path.join(process.cwd(), 'public/uploads');
+    const newPath = path.join(uploadDir, newFilename);
+
+    await fs.mkdir(uploadDir, { recursive: true });
+    await fs.writeFile(newPath, buffer);
+
+    const fileUrl = `/uploads/${newFilename}`;
+    return NextResponse.json({ success: true, url: fileUrl });
+  } catch (e: any) {
+    return handleError(e, 'FileUploadPOST');
+  }
 }

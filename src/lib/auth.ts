@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { admin } from '@/config/firebaseAdmin';
+import { admin, initializeFirebaseAdmin } from '@/config/firebaseAdmin';
 
 function isAdminEmail(email?: string | null) {
   const adminEmail = process.env.ADMIN_EMAIL;
@@ -7,7 +7,7 @@ function isAdminEmail(email?: string | null) {
 }
 
 export async function authenticateAdmin(req: NextRequest) {
-  if (!admin) return { error: 'Server auth not configured', status: 500 };
+  initializeFirebaseAdmin(); // Ensure Firebase Admin SDK is initialized
 
   const authHeader = req.headers.get('authorization');
   if (!authHeader?.startsWith('Bearer ')) return { error: 'Unauthorized', status: 401 };
