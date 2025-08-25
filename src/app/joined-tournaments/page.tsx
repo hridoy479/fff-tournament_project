@@ -43,7 +43,7 @@ export default function JoinedTournamentsPage() {
         });
         const json = await res.json();
         if (!res.ok) throw new Error(json.error || 'Failed to load tournaments');
-        setItems(json.items || []);
+        setItems(json.joinedTournaments || []);
       } catch (err: any) {
         setError(err.message || 'An error occurred while loading tournaments');
       } finally { 

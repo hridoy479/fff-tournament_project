@@ -39,8 +39,8 @@ export async function GET(req: NextRequest) {
     const result = joinedTournamentPlayers.map(joinedPlayer => {
       const tournamentDetails = tournaments.find(t => t.id === joinedPlayer.tournament_id);
       return {
-        ...joinedPlayer, // Includes user_uid, tournament_id, game_name, createdAt
-        tournamentDetails: tournamentDetails, // Full details of the tournament
+        ...joinedPlayer,
+        ...tournamentDetails, // Flatten tournamentDetails into the main object
       };
     });
 

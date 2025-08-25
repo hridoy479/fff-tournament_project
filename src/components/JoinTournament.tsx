@@ -15,10 +15,10 @@ interface JoinTournamentProps {
 }
 
 export default function JoinTournament({ tournamentId, entryFee }: JoinTournamentProps) {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [open, setOpen] = useState(false);
   const [gameName, setGameName] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
   const [insufficient, setInsufficient] = useState(false);
   const [checking, setChecking] = useState(false);
 
@@ -29,7 +29,7 @@ export default function JoinTournament({ tournamentId, entryFee }: JoinTournamen
     }
     try {
       setChecking(true);
-      const token = await user.getIdToken();
+      const token = await user.firebaseUser.getIdToken();
       // Change to /api/user/profile
       const res = await axios.get("/api/user/profile", {
         headers: { Authorization: `Bearer ${token}` },
@@ -57,8 +57,8 @@ export default function JoinTournament({ tournamentId, entryFee }: JoinTournamen
       return;
     }
     try {
-      setLoading(true);
-      const token = await user.getIdToken();
+      setSubmitLoading(true);
+      const token = await user.firebaseUser.getIdToken();
       const res = await axios.post("/api/tournaments/join", {
         tournament_id: tournamentId, // Use tournament_id
         game_name: gameName, // Use game_name
@@ -82,7 +82,7 @@ export default function JoinTournament({ tournamentId, entryFee }: JoinTournamen
         setInsufficient(true);
       }
     } finally {
-      setLoading(false);
+      setSubmitLoading(false);
     }
   };
 
@@ -98,7 +98,7 @@ export default function JoinTournament({ tournamentId, entryFee }: JoinTournamen
         </Alert>
       )}
 
-      <Button className="w-full" onClick={checkAndOpen} disabled={checking}>
+      <Button className="w-full" onClick={checkAndOpen} disabled={checking || loading}>
         {checking ? "Checking..." : "Join Now"}
       </Button>
 
@@ -117,7 +117,7 @@ export default function JoinTournament({ tournamentId, entryFee }: JoinTournamen
           </div>
           <AlertDialogFooter>
             <Button onClick={() => setOpen(false)} variant="outline">Cancel</Button>
-            <Button onClick={submitJoin} disabled={loading}>{loading ? "Joining..." : "Confirm"}</Button>
+            <Button onClick={submitJoin} disabled={submitLoading}>{submitLoading ? "Joining..." : "Confirm"}</Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

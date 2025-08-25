@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const numericId = parseInt(id, 10);
 
     if (isNaN(numericId)) {
@@ -47,7 +47,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const numericId = parseInt(id, 10);
     const body = await req.json();
 
@@ -74,7 +74,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const numericId = parseInt(id, 10);
 
     if (isNaN(numericId)) {
