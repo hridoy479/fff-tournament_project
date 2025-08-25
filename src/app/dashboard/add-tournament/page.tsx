@@ -125,7 +125,7 @@ const AddTournamentPage = () => {
       } else {
         throw new Error(response.data.message || 'Image upload failed');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error uploading image:', error);
       throw new Error(error.response?.data?.message || 'Image upload failed');
     }

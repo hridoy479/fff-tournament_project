@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { authenticateAdmin } from '@/lib/auth';
 
 // Helper function to handle common error responses
-function handleError(error: any, context: string) {
+function handleError(error: unknown, context: string) {
   console.error(`[${context}] Error:`, error);
   return NextResponse.json(
     { success: false, message: `File upload failed: ${error.message || 'Internal server error'}` },
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
 
     const fileUrl = `/uploads/${newFilename}`;
     return NextResponse.json({ success: true, url: fileUrl });
-  } catch (e: any) {
+  } catch (e: unknown) {
     return handleError(e, 'FileUploadPOST');
   }
 }

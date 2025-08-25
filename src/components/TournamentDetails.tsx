@@ -1,10 +1,16 @@
 'use client';
-
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { useAuth } from '@/hooks/useAuth';
 import axios from 'axios';
-import { Calendar, Clock, Trophy, Users } from 'lucide-react';
+import { Calendar, Clock, Trophy, Users, Copy, Check } from 'lucide-react'; // ✅ added Copy + Check
 import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
@@ -34,6 +40,7 @@ interface Tournament {
   joined_players: number;
   max_players?: number;
   category: string;
+  match_id?: string;
   description?: string;
 }
 
@@ -85,6 +92,15 @@ const TournamentDetails = () => {
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+
+  const [copied, setCopied] = useState(false); // ✅ hook declared once at top
+
+  const handleCopy = () => {
+    if (!tournament?.match_id) return;
+    navigator.clipboard.writeText(tournament.match_id);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   useEffect(() => {
     const fetchTournament = async () => {
@@ -200,10 +216,7 @@ const TournamentDetails = () => {
             {/* Countdown */}
             <div className="flex items-center gap-3">
               <Clock className="w-5 h-5 text-indigo-500" />
-              <Countdown
-                date={dateObj}
-                renderer={CountdownRenderer}
-              />
+              <Countdown date={dateObj} renderer={CountdownRenderer} />
             </div>
           </div>
 
@@ -238,18 +251,35 @@ const TournamentDetails = () => {
 
           {/* Match ID Button */}
           <div className="flex items-center gap-3 mb-6">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    Match ID
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="text-sm">Match ID will be provided 5 minutes before start.</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm">Match ID</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Match ID</DialogTitle>
+                  <DialogDescription className="flex items-center justify-between p-3 rounded bg-gray-100 dark:bg-gray-800">
+                    {tournament.match_id ? (
+                      <>
+                        <span className="font-mono text-sm">{tournament.match_id}</span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={handleCopy}
+                          className={copied ? "text-green-500" : "text-gray-600"}
+                        >
+                          {copied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
+                        </Button>
+                      </>
+                    ) : (
+                      <span className="text-sm text-gray-500">
+                        Match ID will be provided 5 minutes before start.
+                      </span>
+                    )}
+                  </DialogDescription>
+                </DialogHeader>
+              </DialogContent>
+            </Dialog>
           </div>
 
           {/* Join Tournament */}

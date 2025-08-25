@@ -108,7 +108,7 @@ export async function POST(req: NextRequest) {
 
     // 11. Return the payment URL to the frontend
     return NextResponse.json({ paymentUrl: paymentUrl }, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[PaymentInitiate] Error initiating UddoktaPay payment:', error);
     // Attempt to update the transaction status to failed if it was created
     if (newTransaction && newTransaction._id) {

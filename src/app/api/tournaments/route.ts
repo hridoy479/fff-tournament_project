@@ -19,13 +19,17 @@ const tournamentSchema = z.object({
   userId: z.string().min(1, 'User ID is required'),
 });
 
+interface TournamentQuery {
+  category?: { $regex: RegExp };
+}
+
 export async function GET(req: NextRequest) {
   try {
     await connectMongo();
     const { searchParams } = new URL(req.url);
     const category = searchParams.get('category');
 
-    let query: any = {};
+    const query: TournamentQuery = {};
     if (category) {
       // Normalize the incoming category name to match database format (e.g., "freefire" -> "Free Fire")
       const normalizedCategory = decodeURIComponent(category)
@@ -73,8 +77,8 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ message: "Tournament created", tournament }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[API/Tournaments POST] Error:', error);
-    return NextResponse.json({ message: 'Failed to create tournament', error: error.message }, { status: 500 });
+    return NextResponse.json({ message: 'Failed to create tournament', error: (error as Error).message }, { status: 500 });
   }
 }

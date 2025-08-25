@@ -4,7 +4,7 @@ import { connectMongo } from '@/config/mongodb';
 import { authenticateAdmin } from '@/lib/auth';
 import { z } from 'zod';
 
-function handleError(error: any, context: string) {
+function handleError(error: unknown, context: string) {
   console.error(`[${context}] Error:`, error);
   if (error instanceof z.ZodError) {
     return NextResponse.json({ success: false, message: 'Validation error', errors: error.errors }, { status: 400 });
