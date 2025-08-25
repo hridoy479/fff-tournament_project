@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { admin, initializeFirebaseAdmin } from '@/config/firebaseAdmin';
 
 function isAdminEmail(email?: string | null) {
-  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
   return !!email && !!adminEmail && email.toLowerCase() === adminEmail.toLowerCase();
 }
 

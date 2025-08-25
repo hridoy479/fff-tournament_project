@@ -5,6 +5,7 @@ interface User {
   _id: string;
   username: string;
   email: string;
+  accountBalance: number;
 }
 
 const UserManagementPage = () => {
@@ -70,6 +71,7 @@ const UserManagementPage = () => {
               <th className="py-3 px-6 text-left">Username</th>
               <th className="py-3 px-6 text-left">Email</th>
               <th className="py-3 px-6 text-left">User ID</th>
+              <th className="py-3 px-6 text-left">Account Balance</th>
               <th className="py-3 px-6 text-center">Actions</th>
             </tr>
           </thead>
@@ -82,6 +84,7 @@ const UserManagementPage = () => {
                 <td className="py-3 px-6 text-left whitespace-nowrap">{user.username}</td>
                 <td className="py-3 px-6 text-left">{user.email}</td>
                 <td className="py-3 px-6 text-left">{user._id}</td>
+                <td className="py-3 px-6 text-left">{user.accountBalance}</td>
                 <td className="py-3 px-6 text-center">
                   <button
                     onClick={() => copyToClipboard(user._id)}

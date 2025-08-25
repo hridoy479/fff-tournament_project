@@ -5,9 +5,9 @@ export interface IUser extends Document {
   uid: string; 
   username: string;
   email?: string; // User's email, optional as some Firebase auth methods might not provide it
-  emailVerified: boolean;
   accountBalance: number; // Balance available for general use (e.g., deposits, withdrawals)
   gameBalance: number; // Balance specifically for in-game activities or tournament entries
+  role: 'user' | 'admin';
   createdAt?: Date; // Timestamp when the user record was created
   updatedAt?: Date; // Timestamp when the user record was last updated
 }
@@ -31,10 +31,6 @@ const UserSchema = new Schema<IUser>({
     // Optional: You might want to add unique: true here if you want to ensure unique emails across your app,
     // but Firebase already handles email uniqueness for its auth methods.
   },
-  emailVerified: {
-    type: Boolean,
-    default: false,
-  },
   accountBalance: {
     type: Number,
     required: true,
@@ -44,6 +40,11 @@ const UserSchema = new Schema<IUser>({
     type: Number,
     required: true,
     default: 0, // Default value for new users
+  },
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user',
   },
 }, {
   timestamps: true, // Automatically adds createdAt and updatedAt fields

@@ -7,8 +7,6 @@ import { useRouter } from 'next/navigation';
 export interface CustomUser {
   firebaseUser: User;
   username?: string;
-  emailVerified?: boolean;
-  isAdmin?: boolean;
 }
 
 export function useAuth() {
@@ -30,9 +28,6 @@ export function useAuth() {
           if (response.data) {
             const userData = response.data;
             setUser({ firebaseUser, ...userData });
-            if (!userData.emailVerified) {
-              router.push('/verify-email');
-            }
           } else {
             setUser({ firebaseUser });
           }

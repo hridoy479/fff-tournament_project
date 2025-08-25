@@ -17,6 +17,7 @@ import { Loader2 } from "lucide-react";
 
 const AlertManagement = () => {
   const { user, loading } = useAuth();
+  const isAdmin = user?.firebaseUser?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL;
   const [alerts, setAlerts] = useState<IAlert[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -33,7 +34,7 @@ const AlertManagement = () => {
   };
 
   const fetchAlerts = async () => {
-    if (!user || !user.isAdmin) return;
+    if (!user || !isAdmin) return;
     try {
       const headers = await getHeaders();
       const res = await fetch("/api/admin/alerts", { headers });
@@ -49,10 +50,10 @@ const AlertManagement = () => {
   };
 
   useEffect(() => {
-    if (user && user.isAdmin) {
+    if (user && isAdmin) {
       fetchAlerts();
     }
-  }, [user]);
+  }, [user, isAdmin]);
 
 
   const handleAddAlert = async (e: React.FormEvent) => {
@@ -123,7 +124,7 @@ const AlertManagement = () => {
     return <p>Loading...</p>;
   }
 
-  if (!user || !user.isAdmin) {
+  if (!user || !isAdmin) {
     return (
       <Card>
         <CardHeader>

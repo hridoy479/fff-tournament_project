@@ -22,6 +22,8 @@ export async function POST(req: NextRequest) {
   const { decodedToken } = authResult;
   const firebaseUid = decodedToken.uid;
   const firebaseEmail = decodedToken.email;
+  const firebaseName = decodedToken.name;
+  console.log('Decoded Token:', decodedToken);
 
   try {
     // 2. Connect to MongoDB
@@ -35,6 +37,7 @@ export async function POST(req: NextRequest) {
       user = await UserModel.create({
         uid: firebaseUid,
         email: firebaseEmail,
+        username: firebaseName,
         accountBalance: 0, // Initialize with default balances
         gameBalance: 0,
       });

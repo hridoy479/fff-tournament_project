@@ -6,7 +6,7 @@ export async function GET(req: NextRequest) {
   try {
     await connectMongo();
 
-    const users = await User.find({}, 'username email _id');
+    const users = await User.find({}, 'username email _id accountBalance');
 
     return NextResponse.json(users);
   } catch (error) {

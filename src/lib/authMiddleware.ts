@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { admin } from '@/config/firebaseAdmin';
+import { admin, initializeFirebaseAdmin } from '@/config/firebaseAdmin';
+
+initializeFirebaseAdmin();
 
 export async function authenticateToken(req: NextRequest) {
   const authHeader = req.headers.get('authorization');

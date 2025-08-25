@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { useState } from 'react'
-import { Home, ListChecks, Gamepad2 } from 'lucide-react'
+import { Home, ListChecks, Gamepad2,BanknoteArrowDown } from 'lucide-react'
 import { Loader2 } from 'lucide-react' // spinner icon
 import {
   Sidebar,
@@ -33,8 +33,9 @@ export default function DashboardSidebar() {
     { label: 'Manage Tournaments', icon: <Gamepad2 />, href: '/dashboard/tournaments', key: 'manage' },
     { label: 'Add Tournament', icon: <Gamepad2 />, href: '/dashboard/add-tournament', key: 'add' },
     { label: 'Alert Management', icon: <ListChecks />, href: '/dashboard/alert-management', key: 'alert' },
-    { label: 'Balance Management', icon: <ListChecks />, href: '/dashboard/balance-management', key: 'balance' },
+    { label: 'Balance Management', icon: <BanknoteArrowDown/>, href: '/dashboard/balance-management', key: 'balance' },
     { label: 'User Management', icon: <ListChecks />, href: '/dashboard/user-management', key: 'user' },
+    { label: 'Role Management', icon: <ListChecks />, href: '/dashboard/role-management', key: 'role' },
   ]
 
   return (
