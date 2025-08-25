@@ -66,6 +66,7 @@ model TournamentPlayer {
 
   // Define the relationship to the Tournament model
   tournament    Tournament @relation(fields: [tournament_id], references: [id])
+  user          User       @relation(fields: [user_uid], references: [uid])
 
   // Composite primary key to ensure a user can only join a specific tournament once
   @@id([user_uid, tournament_id])
@@ -81,6 +82,7 @@ model User {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   transactions   Transaction[]
+  joined_tournaments TournamentPlayer[]
 }
 
 model Alert {

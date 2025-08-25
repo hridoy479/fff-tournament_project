@@ -12,7 +12,25 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ message: 'Invalid tournament ID' }, { status: 400 });
     }
 
-    const tournament = await prisma.tournament.findUnique({ where: { id: numericId } });
+    const tournament = await prisma.tournament.findUnique({
+      where: { id: numericId },
+      include: {
+        players: {
+          include: {
+            user: {
+              select: {
+                uid: true,
+                username: true,
+                email: true,
+                accountBalance: true,
+                gameBalance: true,
+                role: true,
+              },
+            },
+          },
+        },
+      },
+    });
 
     if (!tournament) {
       return NextResponse.json({ message: 'Tournament not found' }, { status: 404 });
