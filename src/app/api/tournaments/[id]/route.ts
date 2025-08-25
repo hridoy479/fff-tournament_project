@@ -5,7 +5,8 @@ import { TournamentModel } from '@/models/Tournament';
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     await connectMongo();
-    const numericId = parseInt(params.id, 10);
+    const { id } = await params;
+    const numericId = parseInt(id, 10);
 
     if (isNaN(numericId)) {
       return NextResponse.json({ message: 'Invalid tournament ID' }, { status: 400 });

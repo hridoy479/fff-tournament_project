@@ -56,6 +56,7 @@ function HomePage() {
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle className="text-center font-bold">Notification</AlertDialogTitle>
+                  
                   <AlertDialogDescription className="text-center">
                     {alert.message}
                   </AlertDialogDescription>

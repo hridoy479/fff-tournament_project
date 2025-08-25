@@ -37,7 +37,7 @@ export default function JoinedTournamentsPage() {
       try {
         setLoading(true);
         setError(null);
-        const token = await user.getIdToken();
+        const token = await user.firebaseUser.getIdToken();
         const res = await fetch('/api/dashboard/joined', {
           headers: { Authorization: `Bearer ${token}` }
         });

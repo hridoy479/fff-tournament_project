@@ -13,6 +13,15 @@ import { toast } from 'react-toastify';
 
 const Countdown = dynamic(() => import('react-countdown').then((m) => m.default), { ssr: false });
 import JoinTournament from './JoinTournament';
+import { PlayerDataTable, columns } from './PlayerDataTable';
+
+interface Player {
+  _id: string;
+  user_uid: string;
+  tournament_id: number;
+  game_name: string;
+  createdAt: string;
+}
 
 interface Tournament {
   id: number;
@@ -65,6 +74,7 @@ const CountdownRenderer = ({ days, hours, minutes, seconds, completed }: any) =>
 const TournamentDetails = () => {
   const { id } = useParams();
   const [tournament, setTournament] = useState<Tournament | null>(null);
+  const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
@@ -84,14 +94,18 @@ const TournamentDetails = () => {
           return;
         }
 
-        const response = await axios.get<{ tournament: Tournament }>(
-          `/api/tournaments/${numericId}`
-        );
-        setTournament(response.data.tournament);
+        const [tournamentResponse, playersResponse] = await Promise.all([
+          axios.get<{ tournament: Tournament }>(`/api/tournaments/${numericId}`),
+          axios.get<{ players: Player[] }>(`/api/tournaments/${numericId}/players`),
+        ]);
+
+        setTournament(tournamentResponse.data.tournament);
+        setPlayers(playersResponse.data.players);
       } catch (error) {
-        console.error('Error fetching tournament details:', error);
-        toast.error('Failed to load tournament details.');
+        console.error('Error fetching tournament details or players:', error);
+        toast.error('Failed to load tournament details or players.');
         setTournament(null);
+        setPlayers([]);
       } finally {
         setLoading(false);
       }
@@ -241,6 +255,12 @@ const TournamentDetails = () => {
                 <li key={idx}>{rule}</li>
               ))}
             </ul>
+          </div>
+
+          {/* Joined Players Table */}
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold mb-3">Joined Players</h3>
+            <PlayerDataTable columns={columns} data={players} />
           </div>
         </div>
       </div>
