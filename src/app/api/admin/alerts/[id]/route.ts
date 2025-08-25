@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { AlertModel } from '@/models/Alert';
-import { connectMongo } from '@/config/mongodb';
+import { PrismaClient } from '@prisma/client'; // Import PrismaClient
 import { authenticateAdmin } from '@/lib/auth';
 import { z } from 'zod';
+
+const prisma = new PrismaClient(); // Initialize PrismaClient
 
 // Helper function to handle common error responses
 function handleError(error: unknown, context: string) {
@@ -27,20 +28,21 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 
   try {
-    await connectMongo();
+    // Removed connectMongo() as it's no longer needed
     const body = await req.json();
     const { message, isActive } = body;
-    const updatedAlert = await AlertModel.findByIdAndUpdate(
-      params.id,
-      { message, isActive },
-      { new: true }
-    );
+    const updatedAlert = await prisma.alert.update({
+      where: { id: parseInt(params.id) },
+      data: { message, isActive },
+    });
     if (!updatedAlert) {
       return NextResponse.json({ success: false, message: 'Alert not found' }, { status: 404 });
     }
     return NextResponse.json({ success: true, data: updatedAlert }, { status: 200 });
   } catch (error) {
     return handleError(error, 'AdminAlertsPUT');
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
@@ -55,13 +57,17 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   }
 
   try {
-    await connectMongo();
-    const deletedAlert = await AlertModel.findByIdAndDelete(params.id);
+    // Removed connectMongo() as it's no longer needed
+    const deletedAlert = await prisma.alert.delete({
+      where: { id: parseInt(params.id) },
+    });
     if (!deletedAlert) {
       return NextResponse.json({ success: false, message: 'Alert not found' }, { status: 404 });
     }
     return NextResponse.json({ success: true, message: 'Alert deleted' }, { status: 200 });
   } catch (error) {
     return handleError(error, 'AdminAlertsDELETE');
+  } finally {
+    await prisma.$disconnect();
   }
 }

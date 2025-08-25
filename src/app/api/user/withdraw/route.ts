@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateToken } from '@/lib/authMiddleware'; // Our custom authentication middleware
-import { connectMongo } from '@/config/mongodb'; // MongoDB connection utility
-import { UserModel } from '@/models/User'; // User Mongoose model
-import { TransactionModel } from '@/models/Transaction'; // Transaction Mongoose model
+import { PrismaClient } from '@prisma/client'; // Import PrismaClient
+
+const prisma = new PrismaClient(); // Initialize PrismaClient
 
 /**
  * POST /api/user/withdraw
@@ -24,8 +24,7 @@ export async function POST(req: NextRequest) {
   const firebaseUid = decodedToken.uid;
 
   try {
-    // 2. Connect to MongoDB
-    await connectMongo();
+    // 2. Removed connectMongo() as it's no longer needed
 
     // 3. Parse the request body
     const { amount } = await req.json();
@@ -35,11 +34,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'Invalid withdrawal amount provided' }, { status: 400 });
     }
 
-    // 5. Find the user in MongoDB
-    const user = await UserModel.findOne({ uid: firebaseUid });
+    // 5. Find the user in PostgreSQL
+    const user = await prisma.user.findUnique({ where: { uid: firebaseUid } });
 
     if (!user) {
-      console.error(`[Withdraw] User not found in MongoDB for Firebase UID: ${firebaseUid}`);
+      console.error(`[Withdraw] User not found in PostgreSQL for Firebase UID: ${firebaseUid}`);
       return NextResponse.json({ message: 'User profile not found in database' }, { status: 404 });
     }
 
@@ -49,28 +48,33 @@ export async function POST(req: NextRequest) {
     }
 
     // 7. Deduct amount from user's account balance atomically
-    const updatedUser = await UserModel.findOneAndUpdate(
-      { uid: firebaseUid },
-      { $inc: { accountBalance: -amount } },
-      { new: true } // Return the updated document
-    );
+    const updatedUser = await prisma.user.update({
+      where: { uid: firebaseUid },
+      data: {
+        accountBalance: {
+          decrement: amount,
+        },
+      },
+    });
 
     if (!updatedUser) {
       throw new Error('User not found during balance update');
     }
 
     // 8. Record the withdrawal transaction
-    await TransactionModel.create({
-      user_uid: firebaseUid,
-      amount: amount,
-      type: 'withdrawal',
-      status: 'completed', // Assuming immediate completion for balance deduction
-      description: `Withdrawal of ${amount} BDT`,
+    await prisma.transaction.create({
+      data: {
+        user_uid: firebaseUid,
+        amount: amount,
+        type: 'withdrawal',
+        status: 'completed', // Assuming immediate completion for balance deduction
+        description: `Withdrawal of ${amount} BDT`,
+      },
     });
 
     // 9. Return success response
     return NextResponse.json(
-      { message: 'Withdrawal successful', newBalance: user.accountBalance },
+      { message: 'Withdrawal successful', newBalance: updatedUser.accountBalance }, // Use updatedUser.accountBalance
       { status: 200 }
     );
   } catch (error) {
@@ -79,5 +83,7 @@ export async function POST(req: NextRequest) {
       { message: 'Internal server error while processing withdrawal' },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }

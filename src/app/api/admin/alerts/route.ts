@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { AlertModel } from '@/models/Alert';
-import { connectMongo } from '@/config/mongodb';
+import { PrismaClient } from '@prisma/client'; // Import PrismaClient
 import { authenticateAdmin } from '@/lib/auth';
 import { z } from 'zod';
+
+const prisma = new PrismaClient(); // Initialize PrismaClient
 
 function handleError(error: unknown, context: string) {
   console.error(`[${context}] Error:`, error);
@@ -22,11 +23,13 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     }
 
-    await connectMongo();
-    const alerts = await AlertModel.find({}).sort({ createdAt: -1 }).lean();
+    // Removed connectMongo() as it's no longer needed
+    const alerts = await prisma.alert.findMany({ orderBy: { createdAt: 'desc' } });
     return NextResponse.json(alerts, { status: 200 });
   } catch (error) {
     return handleError(error, 'AdminAlertsGET');
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
@@ -37,13 +40,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     }
 
-    await connectMongo();
+    // Removed connectMongo() as it's no longer needed
     const body = await req.json();
     const { message, isActive } = body;
-    const newAlert = new AlertModel({ message, isActive });
-    const savedAlert = await newAlert.save();
+    const savedAlert = await prisma.alert.create({
+      data: { message, isActive },
+    });
     return NextResponse.json({ success: true, data: savedAlert }, { status: 201 });
   } catch (error) {
     return handleError(error, 'AdminAlertsPOST');
+  } finally {
+    await prisma.$disconnect();
   }
 }

@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateToken } from '@/lib/authMiddleware'; // Our custom authentication middleware
-import { connectMongo } from '@/config/mongodb'; // MongoDB connection utility
-import { UserModel } from '@/models/User'; // User Mongoose model
-import { TransactionModel } from '@/models/Transaction'; // Transaction Mongoose model
+import { PrismaClient } from '@prisma/client'; // Import PrismaClient
 import axios from 'axios'; // For making HTTP requests to UddoktaPay
+
+const prisma = new PrismaClient(); // Initialize PrismaClient
 
 const UDDOKTAPAY_API_KEY = process.env.UDDOKTAPAY_API_KEY;
 const UDDOKTAPAY_BASE_URL = process.env.UDDOKTAPAY_BASE_URL;
@@ -28,9 +28,10 @@ export async function POST(req: NextRequest) {
   const { decodedToken } = authResult;
   const firebaseUid = decodedToken.uid;
 
+  let newTransaction: any; // Declare newTransaction here to be accessible in catch block
+
   try {
-    // 2. Connect to MongoDB
-    await connectMongo();
+    // 2. Removed connectMongo() as it's no longer needed
 
     // 3. Parse the request body
     const { amount } = await req.json();
@@ -40,11 +41,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'Invalid amount provided' }, { status: 400 });
     }
 
-    // 5. Find the user in MongoDB
-    const user = await UserModel.findOne({ uid: firebaseUid });
+    // 5. Find the user in PostgreSQL
+    const user = await prisma.user.findUnique({ where: { uid: firebaseUid } });
 
     if (!user) {
-      console.error(`[PaymentInitiate] User not found in MongoDB for Firebase UID: ${firebaseUid}`);
+      console.error(`[PaymentInitiate] User not found in PostgreSQL for Firebase UID: ${firebaseUid}`);
       return NextResponse.json({ message: 'User profile not found in database' }, { status: 404 });
     }
 
@@ -55,12 +56,14 @@ export async function POST(req: NextRequest) {
     }
 
     // 7. Create a pending transaction record in our database
-    const newTransaction = await TransactionModel.create({
-      user_uid: firebaseUid,
-      amount: amount,
-      type: 'deposit',
-      status: 'pending',
-      description: `Deposit initiation for ${amount} BDT`,
+    newTransaction = await prisma.transaction.create({
+      data: {
+        user_uid: firebaseUid,
+        amount: amount,
+        type: 'deposit',
+        status: 'pending',
+        description: `Deposit initiation for ${amount} BDT`,
+      },
     });
 
     // 8. Prepare payload for UddoktaPay's Create Charge API
@@ -70,10 +73,10 @@ export async function POST(req: NextRequest) {
       currency: 'BDT', // Assuming BDT, adjust as per your needs
       metadata: {
         user_uid: firebaseUid,
-        transaction_id: newTransaction._id.toString(), // Our internal transaction ID
+        transaction_id: newTransaction.id.toString(), // Our internal transaction ID (Prisma uses 'id')
       },
-      return_url: `${UDDOKTAPAY_CALLBACK_URL}?transaction_id=${newTransaction._id.toString()}&status=success`,
-      cancel_url: `${UDDOKTAPAY_CALLBACK_URL}?transaction_id=${newTransaction._id.toString()}&status=cancelled`,
+      return_url: `${UDDOKTAPAY_CALLBACK_URL}?transaction_id=${newTransaction.id.toString()}&status=success`,
+      cancel_url: `${UDDOKTAPAY_CALLBACK_URL}?transaction_id=${newTransaction.id.toString()}&status=cancelled`,
       // Add other required parameters as per UddoktaPay documentation
       // e.g., customer_name, customer_email, customer_phone, etc.
       // You might get these from the user model or frontend input
@@ -100,9 +103,10 @@ export async function POST(req: NextRequest) {
     if (!paymentUrl) {
       console.error('[PaymentInitiate] UddoktaPay did not return a payment URL:', uddoktaPayResponse.data);
       // If payment URL is not returned, mark our transaction as failed
-      newTransaction.status = 'failed';
-      newTransaction.description = 'UddoktaPay did not return payment URL';
-      await newTransaction.save();
+      await prisma.transaction.update({
+        where: { id: newTransaction.id },
+        data: { status: 'failed', description: 'UddoktaPay did not return payment URL' },
+      });
       return NextResponse.json({ message: 'Failed to get payment URL from gateway' }, { status: 500 });
     }
 
@@ -111,12 +115,17 @@ export async function POST(req: NextRequest) {
   } catch (error: unknown) {
     console.error('[PaymentInitiate] Error initiating UddoktaPay payment:', error);
     // Attempt to update the transaction status to failed if it was created
-    if (newTransaction && newTransaction._id) {
-      await TransactionModel.findByIdAndUpdate(newTransaction._id, { status: 'failed', description: 'Payment initiation failed' });
+    if (newTransaction && newTransaction.id) {
+      await prisma.transaction.update({
+        where: { id: newTransaction.id },
+        data: { status: 'failed', description: 'Payment initiation failed' },
+      });
     }
     return NextResponse.json(
       { message: 'Failed to initiate payment' },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }

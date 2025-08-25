@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { TournamentModel } from '@/models/Tournament';
-import { connectMongo } from '@/config/mongodb';
+import { PrismaClient } from '@prisma/client'; // Import PrismaClient
 import { createTournament } from '@/services/tournamentService';
 import { authenticateAdmin } from '@/lib/auth';
 import { z } from 'zod';
+
+const prisma = new PrismaClient(); // Initialize PrismaClient
 
 // Helper function to handle common error responses
 function handleError(error: unknown, context: string) {
@@ -28,11 +29,13 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    await connectMongo();
-    const tournaments = await TournamentModel.find({}).sort({ date: 1 }).lean();
+    // Removed connectMongo() as it's no longer needed
+    const tournaments = await prisma.tournament.findMany({ orderBy: { date: 'asc' } });
     return NextResponse.json({ tournaments }, { status: 200 });
   } catch (error) {
     return handleError(error, 'AdminTournamentsGET');
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
@@ -47,11 +50,13 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    await connectMongo();
+    // Removed connectMongo() as it's no longer needed
     const body = await req.json();
-    const savedTournament = await createTournament(body);
+    const savedTournament = await createTournament(body); // This will need to be updated in tournamentService.ts
     return NextResponse.json({ success: true, data: savedTournament }, { status: 201 });
   } catch (error) {
     return handleError(error, 'AdminTournamentsPOST');
+  } finally {
+    await prisma.$disconnect();
   }
 }

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateToken } from '@/lib/authMiddleware';
-import { connectMongo } from '@/config/mongodb';
-import { UserModel } from '@/models/User';
+import { PrismaClient } from '@prisma/client'; // Import PrismaClient
+
+const prisma = new PrismaClient(); // Initialize PrismaClient
 
 export async function POST(req: NextRequest) {
   const authResult = await authenticateToken(req);
@@ -14,7 +15,7 @@ export async function POST(req: NextRequest) {
   const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 
   if (decodedToken.email !== adminEmail) {
-    const user = await UserModel.findOne({ uid: decodedToken.uid });
+    const user = await prisma.user.findUnique({ where: { uid: decodedToken.uid } });
     if (user?.role !== 'admin') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
@@ -27,20 +28,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    await connectMongo();
+    // Removed connectMongo() as it's no longer needed
 
-    const userToUpdate = await UserModel.findById(userId);
+    const updatedUser = await prisma.user.update({
+      where: { uid: userId },
+      data: { role: role },
+    });
 
-    if (!userToUpdate) {
+    if (!updatedUser) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    userToUpdate.role = role;
-    await userToUpdate.save();
-
-    return NextResponse.json({ message: 'User role updated successfully', user: userToUpdate });
+    return NextResponse.json({ message: 'User role updated successfully', user: updatedUser });
   } catch (error) {
     console.error('Error updating user role:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
   }
 }

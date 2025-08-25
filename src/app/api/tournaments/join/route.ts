@@ -2,12 +2,9 @@ export const runtime = 'nodejs';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateToken } from '@/lib/authMiddleware';
-import { connectMongo } from '@/config/mongodb';
-import { TournamentPlayerModel } from '@/models/TournamentPlayer';
-import { TournamentModel } from '@/models/Tournament';
-import { UserModel } from '@/models/User';
-import { TransactionModel } from '@/models/Transaction';
-import mongoose from 'mongoose'; // Added mongoose import
+import { PrismaClient } from '@prisma/client'; // Import PrismaClient
+
+const prisma = new PrismaClient(); // Initialize PrismaClient
 
 export async function POST(req: NextRequest) {
   try {
@@ -23,110 +20,135 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid tournamentId or game name' }, { status: 400 });
     }
 
-    await connectMongo();
+    // Removed connectMongo() as it's no longer needed
 
-    const existing = await TournamentPlayerModel.findOne({
-      user_uid: firebaseUid,
-      tournament_id: tournament_id,
+    const existingPlayer = await prisma.tournamentPlayer.findUnique({
+      where: {
+        user_uid_tournament_id: {
+          user_uid: firebaseUid,
+          tournament_id: tournament_id,
+        },
+      },
     });
 
-    if (existing) {
+    if (existingPlayer) {
       return NextResponse.json({ ok: true, alreadyJoined: true });
     }
 
-    // Start transaction
-    const session = await mongoose.startSession();
-    session.startTransaction();
-
     try {
-      // Find the tournament
-      const tournament = await TournamentModel.findOne({ id: tournament_id }).session(session);
+      // Use Prisma's transaction API
+      const result = await prisma.$transaction(async (tx) => {
+        // Find the tournament
+        const tournament = await tx.tournament.findUnique({
+          where: { id: tournament_id },
+        });
 
-      if (!tournament) {
-        await session.abortTransaction();
-        return NextResponse.json({ message: 'Tournament not found' }, { status: 404 });
-      }
+        if (!tournament) {
+          throw new Error('Tournament not found');
+        }
 
-      // Check tournament status
-      if (tournament.status !== 'upcoming') {
-        await session.abortTransaction();
-        return NextResponse.json({ message: 'Cannot join a tournament that is not upcoming' }, { status: 400 });
-      }
+        // Check tournament status
+        if (tournament.status !== 'upcoming') {
+          throw new Error('Cannot join a tournament that is not upcoming');
+        }
 
-      // Find the user in MongoDB
-      const user = await UserModel.findOne({ uid: firebaseUid }).session(session);
+        // Find the user
+        const user = await tx.user.findUnique({
+          where: { uid: firebaseUid },
+        });
 
-      if (!user) {
-        await session.abortTransaction();
-        return NextResponse.json({ message: 'User profile not found in database' }, { status: 404 });
-      }
+        if (!user) {
+          throw new Error('User profile not found in database');
+        }
 
-      // Check if user has sufficient balance
-      if (user.accountBalance < tournament.entry_fee) {
-        await session.abortTransaction();
-        return NextResponse.json({ message: 'Insufficient balance to join this tournament' }, { status: 402 }); // 402 Payment Required
-      }
+        // Check if user has sufficient balance
+        if (user.accountBalance < tournament.entry_fee) {
+          throw new Error('Insufficient balance to join this tournament');
+        }
 
-      // Deduct entry fee from user's account balance atomically
-      const updatedUser = await UserModel.findOneAndUpdate(
-        { uid: firebaseUid },
-        { $inc: { accountBalance: -tournament.entry_fee } },
-        { new: true, session } // Return the updated document and pass session
-      );
+        // Deduct entry fee from user's account balance atomically
+        const updatedUser = await tx.user.update({
+          where: { uid: firebaseUid },
+          data: {
+            accountBalance: {
+              decrement: tournament.entry_fee,
+            },
+          },
+        });
 
-      if (!updatedUser) {
-        throw new Error('User not found during balance update');
-      }
+        if (!updatedUser) {
+          throw new Error('User not found during balance update');
+        }
 
-      // Create new TournamentPlayer entry
-      const newPlayer = await TournamentPlayerModel.create([
-        {
-          user_uid: firebaseUid,
-          tournament_id: tournament_id,
-          game_name: game_name,
-        },
-      ], { session });
+        // Create new TournamentPlayer entry
+        const newPlayer = await tx.tournamentPlayer.create({
+          data: {
+            user_uid: firebaseUid,
+            tournament_id: tournament_id,
+            game_name: game_name,
+          },
+        });
 
-      // Update joined_players count in Tournament atomically
-      const updatedTournament = await TournamentModel.findOneAndUpdate(
-        { id: tournament_id },
-        { $inc: { joined_players: 1 } },
-        { new: true, session } // Return the updated document and pass session
-      );
+        // Update joined_players count in Tournament atomically
+        const updatedTournament = await tx.tournament.update({
+          where: { id: tournament_id },
+          data: {
+            joined_players: {
+              increment: 1,
+            },
+          },
+        });
 
-      if (!updatedTournament) {
-        throw new Error('Tournament not found during joined_players update');
-      }
+        if (!updatedTournament) {
+          throw new Error('Tournament not found during joined_players update');
+        }
 
-      // Record the transaction
-      await TransactionModel.create([
-        {
-          user_uid: firebaseUid,
-          amount: tournament.entry_fee,
-          type: 'tournament_entry',
-          status: 'completed',
-          description: `Entry fee for tournament: ${tournament.title}`,
-        },
-      ], { session });
+        // Record the transaction
+        await tx.transaction.create({
+          data: {
+            user_uid: firebaseUid,
+            amount: tournament.entry_fee,
+            type: 'tournament_entry',
+            status: 'completed',
+            description: `Entry fee for tournament: ${tournament.title}`,
+          },
+        });
 
-      await session.commitTransaction(); // Commit transaction
+        return { newPlayer };
+      });
 
       return NextResponse.json(
-        { message: 'Successfully joined tournament', player: newPlayer[0].toJSON() },
+        { message: 'Successfully joined tournament', player: result.newPlayer },
         { status: 200 }
       );
-    } catch (transactionError) {
-      await session.abortTransaction(); // Abort transaction on error
-      console.error('[JoinTournament] Transaction failed:', transactionError);
+    } catch (transactionError: any) {
+      console.error('[JoinTournament] Transaction failed:', transactionError.message);
+      let status = 500;
+      let message = 'Failed to process joining request due to a transaction error';
+
+      if (transactionError.message === 'Tournament not found') {
+        status = 404;
+        message = 'Tournament not found';
+      } else if (transactionError.message === 'Cannot join a tournament that is not upcoming') {
+        status = 400;
+        message = 'Cannot join a tournament that is not upcoming';
+      } else if (transactionError.message === 'User profile not found in database') {
+        status = 404;
+        message = 'User profile not found in database';
+      } else if (transactionError.message === 'Insufficient balance to join this tournament') {
+        status = 402;
+        message = 'Insufficient balance to join this tournament';
+      }
+
       return NextResponse.json(
-        { message: 'Failed to process joining request due to a transaction error' },
-        { status: 500 }
+        { message: message },
+        { status: status }
       );
-    } finally {
-      session.endSession();
     }
   } catch (e) {
     console.error("POST /api/join error:", e);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
   }
 }

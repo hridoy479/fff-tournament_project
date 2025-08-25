@@ -1,0 +1,109 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL") 
+  directUrl = env("DIRECT_URL")   
+}
+
+enum TournamentStatus {
+  upcoming
+  started
+  completed
+  cancelled
+}
+
+enum UserRole {
+  user
+  admin
+}
+
+enum TransactionType {
+  deposit
+  withdrawal
+  tournament_entry
+  tournament_prize
+}
+
+enum TransactionStatus {
+  pending
+  completed
+  failed
+}
+
+model Tournament {
+  id            Int              @id @default(autoincrement())
+  title         String
+  date          DateTime
+  entry_fee     Int              @default(0)
+  status        TournamentStatus @default(upcoming)
+  image         String?
+  prize         String?
+  joined_players Int             @default(0)
+  max_players   Int?
+  category      String
+  ffGameType    String?
+  description   String?
+  userId        String // Firebase UID of the creator
+  match_id      String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  // Relationship to TournamentPlayer
+  players TournamentPlayer[]
+}
+
+model TournamentPlayer {
+  user_uid      String
+  tournament_id Int
+  game_name     String
+  createdAt     DateTime @default(now())
+
+  // Define the relationship to the Tournament model
+  tournament    Tournament @relation(fields: [tournament_id], references: [id])
+
+  // Composite primary key to ensure a user can only join a specific tournament once
+  @@id([user_uid, tournament_id])
+}
+
+model User {
+  uid            String        @id @unique // Firebase UID, primary key
+  username       String        @unique
+  email          String?
+  accountBalance Float         @default(0)
+  gameBalance    Float         @default(0)
+  role           UserRole      @default(user)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  transactions   Transaction[]
+}
+
+model Alert {
+  id        Int      @id @default(autoincrement())
+  message   String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Counter {
+  id  String @id
+  seq Int    @default(0)
+}
+
+model Transaction {
+  id                   Int             @id @default(autoincrement())
+  user_uid             String
+  amount               Float
+  type                 TransactionType
+  status               TransactionStatus @default(pending)
+  gateway_transaction_id String?         @unique
+  description          String?
+  createdAt            DateTime        @default(now())
+  user                 User            @relation(fields: [user_uid], references: [uid])
+}

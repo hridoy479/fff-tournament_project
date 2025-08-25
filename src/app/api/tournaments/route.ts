@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
-import { connectMongo } from '@/config/mongodb';
-import { TournamentModel } from '@/models/Tournament';
+import { PrismaClient } from '@prisma/client'; // Import PrismaClient
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
+
+const prisma = new PrismaClient(); // Initialize PrismaClient
 
 const tournamentSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -19,39 +20,39 @@ const tournamentSchema = z.object({
   userId: z.string().min(1, 'User ID is required'),
 });
 
-interface TournamentQuery {
-  category?: { $regex: RegExp };
-}
-
 export async function GET(req: NextRequest) {
   try {
-    await connectMongo();
+    // Removed connectMongo() as it's no longer needed
     const { searchParams } = new URL(req.url);
     const category = searchParams.get('category');
 
-    const query: TournamentQuery = {};
+    let whereClause: any = {};
     if (category) {
-      // Normalize the incoming category name to match database format (e.g., "freefire" -> "Free Fire")
       const normalizedCategory = decodeURIComponent(category)
-        .replace(/-/g, ' ') // Replace hyphens with spaces
+        .replace(/-/g, ' ')
         .split(' ')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
         .join(' ');
 
-      query.category = { $regex: new RegExp(`^${normalizedCategory}$`, 'i') };
+      whereClause.category = { contains: normalizedCategory, mode: 'insensitive' };
     }
 
-    const tournaments = await TournamentModel.find(query).sort({ date: 1 }).lean();
+    const tournaments = await prisma.tournament.findMany({
+      where: whereClause,
+      orderBy: { date: 'asc' },
+    });
     return NextResponse.json({ tournaments });
   } catch (error) {
     console.error('[API/Tournaments GET] Error:', error);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
-    await connectMongo();
+    // Removed connectMongo() as it's no longer needed
     const body = await req.json();
     const validation = tournamentSchema.safeParse(body);
 
@@ -61,24 +62,28 @@ export async function POST(req: NextRequest) {
 
     const { data } = validation;
 
-    const tournament = await TournamentModel.create({
-      title: data.title,
-      date: new Date(data.date),
-      image: data.image,
-      entry_fee: data.entry_fee,
-      prize: data.prize,
-      joined_players: data.joined_players,
-      max_players: data.max_players,
-      category: data.category,
-      ffGameType: data.ffGameType,
-      description: data.description,
-      status: data.status,
-      userId: data.userId,
+    const tournament = await prisma.tournament.create({
+      data: {
+        title: data.title,
+        date: new Date(data.date),
+        image: data.image,
+        entry_fee: data.entry_fee,
+        prize: data.prize,
+        joined_players: data.joined_players,
+        max_players: data.max_players,
+        category: data.category,
+        ffGameType: data.ffGameType,
+        description: data.description,
+        status: data.status,
+        userId: data.userId,
+      },
     });
 
     return NextResponse.json({ message: "Tournament created", tournament }, { status: 201 });
   } catch (error: unknown) {
     console.error('[API/Tournaments POST] Error:', error);
     return NextResponse.json({ message: 'Failed to create tournament', error: (error as Error).message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
   }
 }

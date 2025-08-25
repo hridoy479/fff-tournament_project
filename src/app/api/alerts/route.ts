@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server';
-import { AlertModel } from '@/models/Alert';
-import { connectMongo } from '@/config/mongodb';
+import { PrismaClient } from '@prisma/client'; // Import PrismaClient
+
+const prisma = new PrismaClient(); // Initialize PrismaClient
 
 export async function GET() {
   try {
-    await connectMongo();
-    const alerts = await AlertModel.find({ isActive: true }).sort({ createdAt: -1 }).lean();
+    // Removed connectMongo() as it's no longer needed
+    const alerts = await prisma.alert.findMany({
+      where: { isActive: true },
+      orderBy: { createdAt: 'desc' },
+    });
     return NextResponse.json(alerts, { status: 200 });
   } catch (error) {
     console.error(`[AlertsGET] Error:`, error);
@@ -13,5 +17,7 @@ export async function GET() {
       { message: `Internal server error while fetching alerts` },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }

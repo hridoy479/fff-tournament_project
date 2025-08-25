@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateToken } from '@/lib/authMiddleware'; // Our custom authentication middleware
-import { connectMongo } from '@/config/mongodb'; // MongoDB connection utility
-import { TournamentPlayerModel } from '@/models/TournamentPlayer'; // TournamentPlayer Mongoose model
-import { TournamentModel } from '@/models/Tournament'; // Tournament Mongoose model
+import { PrismaClient } from '@prisma/client'; // Import PrismaClient
+
+const prisma = new PrismaClient(); // Initialize PrismaClient
 
 /**
  * GET /api/dashboard/joined
@@ -23,18 +23,16 @@ export async function GET(req: NextRequest) {
   const firebaseUid = decodedToken.uid;
 
   try {
-    // 2. Connect to MongoDB
-    await connectMongo();
+    // 2. Removed connectMongo() as it's no longer needed
 
     // 3. Find all TournamentPlayer entries for the authenticated user
-    const joinedTournamentPlayers = await TournamentPlayerModel.find({ user_uid: firebaseUid }).lean();
+    const joinedTournamentPlayers = await prisma.tournamentPlayer.findMany({ where: { user_uid: firebaseUid } });
 
     // 4. Extract unique tournament IDs from the joined entries
     const tournamentIds = joinedTournamentPlayers.map(player => player.tournament_id);
 
     // 5. Fetch the details of these tournaments
-    // Using $in operator to find all tournaments whose IDs are in the tournamentIds array
-    const tournaments = await TournamentModel.find({ id: { $in: tournamentIds } }).lean();
+    const tournaments = await prisma.tournament.findMany({ where: { id: { in: tournamentIds } } });
 
     // 6. Combine joined player data with full tournament details
     // This creates a richer object for the frontend
@@ -54,5 +52,7 @@ export async function GET(req: NextRequest) {
       { message: 'Internal server error while fetching joined tournaments' },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }

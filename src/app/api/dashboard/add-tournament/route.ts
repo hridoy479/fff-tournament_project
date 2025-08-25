@@ -1,8 +1,9 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { connectMongo } from '@/config/mongodb';
-import { TournamentModel } from '@/models/Tournament';
+import { PrismaClient } from '@prisma/client'; // Import PrismaClient
 import { authenticateAdmin } from '@/lib/auth';
 import { z } from 'zod';
+
+const prisma = new PrismaClient(); // Initialize PrismaClient
 
 const tournamentSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -34,22 +35,21 @@ export async function POST(req: NextRequest) {
 
     const { data } = validation;
 
-    await connectMongo();
+    // Removed connectMongo() as it's no longer needed
 
-    const lastTournament = await TournamentModel.findOne({}).sort({ id: -1 }).lean();
-    const nextId = (lastTournament?.id ?? 0) + 1;
-
-    const tournament = new TournamentModel({
-      ...data,
-      id: nextId,
-      date: new Date(data.date),
+    // Prisma handles auto-incrementing IDs, so no need to find lastTournament or calculate nextId
+    const tournament = await prisma.tournament.create({
+      data: {
+        ...data,
+        date: new Date(data.date),
+      },
     });
 
-    const saved = await tournament.save();
-
-    return NextResponse.json({ success: true, data: saved }, { status: 201 });
+    return NextResponse.json({ success: true, data: tournament }, { status: 201 });
   } catch (err) {
     console.error('Add Tournament Error:', err);
     return NextResponse.json({ success: false, message: 'Failed to add tournament' }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
   }
 }

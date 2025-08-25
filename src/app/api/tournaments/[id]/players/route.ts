@@ -1,13 +1,14 @@
 
-import { TournamentPlayerModel } from '@/models/TournamentPlayer';
 import { NextRequest, NextResponse } from 'next/server';
-import { connectMongo } from '@/config/mongodb';
+import { PrismaClient } from '@prisma/client'; // Import PrismaClient
+
+const prisma = new PrismaClient(); // Initialize PrismaClient
 
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  await connectMongo();
+  // Removed connectMongo() as it's no longer needed
 
   try {
     const { id } = await params;
@@ -16,9 +17,16 @@ export async function GET(
       return NextResponse.json({ message: 'Invalid ID format' }, { status: 400 });
     }
 
-    const players = await TournamentPlayerModel.find({
-      tournament_id: numericId,
-    }).populate('user_uid', 'name');
+    const players = await prisma.tournamentPlayer.findMany({
+      where: {
+        tournament_id: numericId,
+      },
+      include: {
+        user: {
+          select: { username: true }, // Select only the username from the related User model
+        },
+      },
+    });
 
     return NextResponse.json({ players });
   } catch (error) {
@@ -27,5 +35,7 @@ export async function GET(
       { message: 'Internal server error' },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateToken } from '@/lib/authMiddleware';
-import { connectMongo } from '@/config/mongodb';
-import { UserModel } from '@/models/User';
+import { PrismaClient } from '@prisma/client'; // Import PrismaClient
+
+const prisma = new PrismaClient(); // Initialize PrismaClient
 
 export async function GET(req: NextRequest) {
   const authResult = await authenticateToken(req);
@@ -14,9 +15,9 @@ export async function GET(req: NextRequest) {
   const firebaseUid = decodedToken.uid;
 
   try {
-    await connectMongo();
+    // Removed connectMongo() as it's no longer needed
 
-    const user = await UserModel.findOne({ uid: firebaseUid });
+    const user = await prisma.user.findUnique({ where: { uid: firebaseUid } });
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -26,5 +27,7 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error('Error fetching user status:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
   }
 }

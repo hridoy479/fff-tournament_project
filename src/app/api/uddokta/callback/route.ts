@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { UserModel } from "@/models/User";
-import { TransactionModel } from "@/models/Transaction"; // Fixed typo
-import mongoose from "mongoose";
-import { connectMongo } from "@/config/mongodb"; // Fixed typo
+import { PrismaClient } from '@prisma/client'; // Import PrismaClient
+
+const prisma = new PrismaClient(); // Initialize PrismaClient
 
 export async function POST(req: NextRequest) {
   try {
-    await connectMongo(); // Fixed typo
+    // Removed connectMongo() as it's no longer needed
     const body = await req.json();
 
     const { amount, status, transaction_id, metadata } = body;
@@ -19,8 +18,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const existingTransaction = await TransactionModel.findOne({
-      gateway_transaction_id: transaction_id,
+    const existingTransaction = await prisma.transaction.findUnique({
+      where: { gateway_transaction_id: transaction_id },
     });
 
     if (existingTransaction) {
@@ -30,53 +29,54 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const session = await mongoose.startSession();
-    session.startTransaction();
-
     try {
-      if (status === "COMPLETED") {
-        const newTransaction = new TransactionModel({
-          user_uid,
-          amount,
-          type: "deposit",
-          status: "completed",
-          gateway_transaction_id: transaction_id,
-          description: "Deposit from Uddokta",
-        });
+      await prisma.$transaction(async (tx) => {
+        if (status === "COMPLETED") {
+          await tx.transaction.create({
+            data: {
+              user_uid,
+              amount,
+              type: "deposit",
+              status: "completed",
+              gateway_transaction_id: transaction_id,
+              description: "Deposit from Uddokta",
+            },
+          });
 
-        await newTransaction.save({ session });
+          const user = await tx.user.findUnique({ where: { uid: user_uid } });
+          if (!user) {
+            throw new Error("User not found");
+          }
 
-        const user = await UserModel.findOne({ uid: user_uid }).session(session);
-        if (!user) {
-          throw new Error("User not found");
+          await tx.user.update({
+            where: { uid: user_uid },
+            data: {
+              accountBalance: {
+                increment: amount,
+              },
+            },
+          });
+        } else {
+          await tx.transaction.create({
+            data: {
+              user_uid,
+              amount,
+              type: "deposit",
+              status: "failed",
+              gateway_transaction_id: transaction_id,
+              description: "Failed deposit from Uddokta",
+            },
+          });
         }
+      });
 
-        user.accountBalance += amount; // Changed from user.balance to user.accountBalance
-        await user.save({ session });
-      } else {
-        const newTransaction = new TransactionModel({
-          user_uid,
-          amount,
-          type: "deposit",
-          status: "failed",
-          gateway_transaction_id: transaction_id,
-          description: "Failed deposit from Uddokta",
-        });
-
-        await newTransaction.save({ session });
-      }
-
-      await session.commitTransaction();
       return NextResponse.json({ message: "Callback processed successfully" });
     } catch (error) {
-      await session.abortTransaction();
       console.error("Transaction error:", error);
       return NextResponse.json(
         { message: "Internal server error" },
         { status: 500 }
       );
-    } finally {
-      session.endSession();
     }
   } catch (error) {
     console.error("Callback processing error:", error);
@@ -84,5 +84,7 @@ export async function POST(req: NextRequest) {
       { message: "Internal server error" },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }

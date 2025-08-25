@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 
 interface User {
-  _id: string;
+  uid: string;
   username: string;
   email: string;
   accountBalance: number;
@@ -78,23 +78,23 @@ const UserManagementPage = () => {
           <tbody className="text-gray-600 dark:text-gray-200 text-sm font-light">
             {filteredUsers.map((user) => (
               <tr
-                key={user._id}
+                key={user.uid}
                 className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600"
               >
                 <td className="py-3 px-6 text-left whitespace-nowrap">{user.username}</td>
                 <td className="py-3 px-6 text-left">{user.email}</td>
-                <td className="py-3 px-6 text-left">{user._id}</td>
+                <td className="py-3 px-6 text-left">{user.uid}</td>
                 <td className="py-3 px-6 text-left">{user.accountBalance}</td>
                 <td className="py-3 px-6 text-center">
                   <button
-                    onClick={() => copyToClipboard(user._id)}
+                    onClick={() => copyToClipboard(user.uid)}
                     className={`${
-                      copiedUserId === user._id
+                      copiedUserId === user.uid
                         ? 'bg-green-500 hover:bg-green-600'
                         : 'bg-indigo-500 hover:bg-indigo-600'
                     } text-white font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150`}
                   >
-                    {copiedUserId === user._id ? 'Copied!' : 'Copy'}
+                    {copiedUserId === user.uid ? 'Copied!' : 'Copy'}
                   </button>
                 </td>
               </tr>

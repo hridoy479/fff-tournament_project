@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectMongo } from '@/config/mongodb';
-import { UserModel as User } from '@/models/User';
+import { PrismaClient } from '@prisma/client'; // Import PrismaClient
+
+const prisma = new PrismaClient(); // Initialize PrismaClient
 
 export async function POST(req: NextRequest) {
   try {
-    await connectMongo();
+    // Removed connectMongo() as it's no longer needed
 
     const { userId, amount, action } = await req.json();
 
@@ -12,23 +13,36 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const user = await User.findById(userId);
-
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
-
+    let updatedUser;
     if (action === 'bonus') {
-      user.accountBalance += amount;
+      updatedUser = await prisma.user.update({
+        where: { uid: userId },
+        data: {
+          accountBalance: {
+            increment: amount,
+          },
+        },
+      });
     } else if (action === 'fine') {
-      user.accountBalance -= amount;
+      updatedUser = await prisma.user.update({
+        where: { uid: userId },
+        data: {
+          accountBalance: {
+            decrement: amount,
+          },
+        },
+      });
     }
 
-    await user.save();
+    if (!updatedUser) {
+      return NextResponse.json({ error: 'User not found or update failed' }, { status: 404 });
+    }
 
-    return NextResponse.json({ message: 'Balance updated successfully', user });
+    return NextResponse.json({ message: 'Balance updated successfully', user: updatedUser });
   } catch (error) {
     console.error('Error updating balance:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
   }
 }
