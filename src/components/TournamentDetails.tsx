@@ -37,8 +37,16 @@ interface Tournament {
   description?: string;
 }
 
+interface CountdownRendererProps {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+  completed: boolean;
+}
+
 // Custom Countdown Renderer Component
-const CountdownRenderer = ({ days, hours, minutes, seconds, completed }: any) => {
+const CountdownRenderer = ({ days, hours, minutes, seconds, completed }: CountdownRendererProps) => {
   if (completed) {
     return <span className="text-red-500 font-semibold">Started</span>;
   }
