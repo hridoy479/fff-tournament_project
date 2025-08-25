@@ -10,7 +10,7 @@ import { auth } from '@/config/firebase';
 import { toast } from 'react-toastify';
 
 import { Progress } from "@/components/ui/progress";
-import { Label } from "@/components/ui/label";
+
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -200,6 +200,7 @@ const TournamentItem: React.FC<{
             fill
             className="object-cover"
             onError={() => setImageError(true)}
+            
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">

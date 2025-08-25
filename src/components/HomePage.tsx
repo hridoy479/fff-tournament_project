@@ -1,11 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import { AutoCarousel } from "@/components/AutoCarousel";
-import { MobileCarousel } from "@/components/MobileCarousel";
 import TournamentCardHome from "@/components/TournamentCardHome";
 import HomeSlider from "@/components/HomeSlider";
 import { motion } from "framer-motion";
@@ -13,7 +8,7 @@ import RulesComponents from "./RulesComponents";
 import BeforeFooter from "./BeforeFooter";
 
 interface IAlert {
-  _id: string;
+  id: string;
   message: string;
   isActive: boolean;
   isOpen: boolean; // Added isOpen property
@@ -41,7 +36,7 @@ function HomePage() {
   const handleDismiss = (alertId: string) => {
     setAlerts((prevAlerts) =>
       prevAlerts.map((alert) =>
-        alert._id === alertId ? { ...alert, isOpen: false } : alert
+        alert.id === alertId ? { ...alert, isOpen: false } : alert
       )
     );
   };
@@ -52,7 +47,7 @@ function HomePage() {
         {alerts
           .filter((alert) => alert.isOpen) // Filter by isOpen
           .map((alert) => (
-            <AlertDialog open={alert.isOpen} onOpenChange={() => handleDismiss(alert._id)} key={alert._id}>
+            <AlertDialog open={alert.isOpen} onOpenChange={() => handleDismiss(alert._id)} key={alert.id}>
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle className="text-center font-bold">Notification</AlertDialogTitle>
@@ -62,7 +57,7 @@ function HomePage() {
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogAction onClick={() => handleDismiss(alert._id)}>Dismiss</AlertDialogAction>
+                  <AlertDialogAction onClick={() => handleDismiss(alert.id)}>Dismiss</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
@@ -105,9 +100,7 @@ function HomePage() {
         transition={{ delay: 0.3, duration: 0.6 }}
         className="w-full mb-10 px-4"
       >
-        <div className="">
-          <AutoCarousel />
-        </div>
+        
         
       </motion.section>
 

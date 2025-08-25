@@ -22,7 +22,7 @@ import JoinTournament from './JoinTournament';
 import { PlayerDataTable, columns } from './PlayerDataTable';
 
 interface Player {
-  _id: string;
+  uid: string;
   user_uid: string;
   tournament_id: number;
   game_name: string;

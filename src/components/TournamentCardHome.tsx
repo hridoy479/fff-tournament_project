@@ -263,12 +263,12 @@ const TournamentCardHome: React.FC = () => {
               <div className="mb-4 grid grid-cols-2 gap-3">
                 <div className="flex flex-col items-center rounded-xl bg-blue-50 p-3 border border-blue-100 dark:bg-blue-950/30 dark:border-blue-800/30">
                   <CreditCard className="h-5 w-5 text-blue-600 dark:text-blue-400 mb-1.5" />
-                  <span className="text-sm font-bold text-blue-700 dark:text-blue-300">₹{tournament.entry_fee}</span>
+                  <span className="text-sm font-bold text-blue-700 dark:text-blue-300">{tournament.entry_fee||"FREE"}৳</span>
                   <span className="text-xs text-blue-600/80 dark:text-blue-400/80">Entry Fee</span>
                 </div>
                 <div className="flex flex-col items-center rounded-xl bg-amber-50 p-3 border border-amber-100 dark:bg-amber-950/30 dark:border-amber-800/30">
                   <Trophy className="h-5 w-5 text-amber-600 dark:text-amber-400 mb-1.5" />
-                  <span className="text-sm font-bold text-amber-700 dark:text-amber-300">{tournament.prize || "N/A"}</span>
+                  <span className="text-sm font-bold text-amber-700 dark:text-amber-300">{tournament.prize || "N/A"}৳</span>
                   <span className="text-xs text-amber-600/80 dark:text-amber-400/80">Prize Pool</span>
                 </div>
               </div>

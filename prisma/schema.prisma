@@ -73,7 +73,7 @@ model TournamentPlayer {
 
 model User {
   uid            String        @id @unique // Firebase UID, primary key
-  username       String        @unique
+  username       String        
   email          String?
   accountBalance Float         @default(0)
   gameBalance    Float         @default(0)

@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     const validation = tournamentSchema.safeParse(body);
 
     if (!validation.success) {
-      return NextResponse.json({ success: false, errors: validation.error.errors }, { status: 400 });
+      return NextResponse.json({ success: false, errors: validation.error}, { status: 400 });
     }
 
     const { data } = validation;
